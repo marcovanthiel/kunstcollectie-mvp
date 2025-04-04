@@ -1,0 +1,14 @@
+name = "kunstcollectie"
+
+[build]
+builder = "nixpacks"
+buildCommand = "cd frontend && npm install --legacy-peer-deps && npm run build"
+
+[deploy]
+startCommand = "cd frontend && npm run preview -- --host 0.0.0.0 --port $PORT"
+restartPolicyType = "on-failure"
+restartPolicyMaxRetries = 5
+
+[env]
+NODE_ENV = "production"
+PORT = "3000"

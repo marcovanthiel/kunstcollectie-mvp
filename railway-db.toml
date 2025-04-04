@@ -1,0 +1,12 @@
+# Kunstcollectie Database Configuration
+
+name = "kunstcollectie-db"
+
+[env]
+POSTGRES_USER = "kunstcollectie"
+POSTGRES_PASSWORD = "secure_password_2025"
+POSTGRES_DB = "kunstcollectie"
+
+[mounts]
+source = "kunstcollectie_data"
+destination = "/var/lib/postgresql/data"
