@@ -1,12 +1,13 @@
-FROM node:18-alpine
+FROM node:18
 
 WORKDIR /app
 
-COPY . .
-
+COPY package*.json ./
 RUN npm install
-RUN npm run build
+
+COPY . .
+RUN NODE_OPTIONS="--max-old-space-size=4096" npx next build
 
 EXPOSE $PORT
 
-CMD npm run start
+CMD ["sh", "-c", "npx next start -p ${PORT:-3001}"]
