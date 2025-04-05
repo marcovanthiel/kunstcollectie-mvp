@@ -1,0 +1,20 @@
+[nixpacks]
+# Specify that this is a Node.js project
+provider = "node"
+
+# Set Node.js version
+node_version = "18"
+
+# Install phase
+install_phase = "cd frontend && npm install --legacy-peer-deps"
+
+# Build phase
+build_phase = "cd frontend && npm run build"
+
+# Start command
+start_phase = "cd frontend && npm run preview -- --host 0.0.0.0 --port $PORT"
+
+# Environment variables
+[nixpacks.env]
+NODE_ENV = "production"
+PORT = "3000"

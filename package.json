@@ -1,0 +1,11 @@
+{
+  "name": "kunstcollectie-root",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "cd frontend && npm install --legacy-peer-deps && npm run build",
+    "start": "cd frontend && npm run preview -- --host 0.0.0.0 --port $PORT"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
