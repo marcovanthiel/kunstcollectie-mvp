@@ -1,10 +1,11 @@
 {
   "name": "kunstcollectie-backend",
   "version": "1.0.0",
-  "scripts": {
-    "build": "npm install && next build",
-    "start": "next start -p $PORT"
-  },
+"scripts": {
+  "dev": "next dev",
+  "build": "./node_modules/.bin/next build",
+  "start": "./node_modules/.bin/next start -p $PORT"
+
   "engines": {
     "node": ">=18.0.0"
   }
