@@ -2,7 +2,8 @@ FROM node:18
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY package.json ./
+# Use npm install instead of npm ci to generate a new package-lock.json
 RUN npm install
 
 COPY . .
