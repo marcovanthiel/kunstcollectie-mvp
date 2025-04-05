@@ -4,8 +4,9 @@ WORKDIR /app
 
 COPY . .
 
-RUN cd frontend && npm install --legacy-peer-deps && npm run build
+RUN npm install
+RUN npm run build
 
 EXPOSE $PORT
 
-CMD cd frontend && npm run preview -- --host 0.0.0.0 --port $PORT
+CMD npm run start
