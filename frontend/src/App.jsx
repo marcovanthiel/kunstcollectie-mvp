@@ -73,6 +73,9 @@ function App() {
       <CssBaseline />
       <Router>
         <Routes>
+          {/* Health check route toevoegen */}
+          <Route path="/health" element={<div>OK</div>} />
+          
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<Layout />}>
             <Route index element={<Dashboard />} />
@@ -92,23 +95,4 @@ function App() {
   );
 }
 
-import { Routes, Route } from 'react-router-dom';
-// Andere imports...
-
-function App() {
-  return (
-    <Routes>
-      {/* Bestaande routes */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      
-      {/* Health check route toevoegen */}
-      <Route path="/health" element={<div>OK</div>} />
-      
-      {/* Andere routes */}
-    </Routes>
-  );
-}
-
 export default App;
-
