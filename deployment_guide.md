@@ -8,7 +8,7 @@ De Kunstcollectie applicatie bestaat uit twee hoofdcomponenten:
 1. Frontend: Een React applicatie gebouwd met Vite
 2. Backend: Een Next.js API server met Prisma ORM
 
-Voor eenvoudige deployment zijn beide componenten geconfigureerd om vanuit één repository te worden gedeployed met een enkele Docker configuratie.
+Voor eenvoudige deployment zijn beide componenten geconfigureerd om vanuit één repository te worden gedeployed met een enkele nixpacks configuratie.
 
 ## Vereisten
 
@@ -22,7 +22,7 @@ Voor eenvoudige deployment zijn beide componenten geconfigureerd om vanuit één
 
 Zorg ervoor dat de volgende bestanden correct zijn geconfigureerd in de root van uw repository:
 
-- `Dockerfile`: Bevat instructies voor het bouwen van zowel frontend als backend
+- `nixpacks.toml`: Bevat instructies voor het bouwen van zowel frontend als backend
 - `start.sh`: Script om beide services te starten
 - `railway.toml`: Railway configuratie met omgevingsvariabelen
 
@@ -32,7 +32,7 @@ Zorg ervoor dat de volgende bestanden correct zijn geconfigureerd in de root van
 2. Klik op "New Project" > "Deploy from GitHub repo"
 3. Selecteer uw repository
 4. Zorg ervoor dat de Root Directory leeg is (om de root van de repository te gebruiken)
-5. Selecteer "Docker" als builder
+5. Selecteer "Nixpacks" als builder
 6. Klik op "Deploy"
 
 ### 3. Omgevingsvariabelen

@@ -1,7 +1,7 @@
 name = "kunstcollectie"
 
 [build]
-builder = "docker"
+builder = "nixpacks"
 
 [deploy]
 restartPolicyType = "on_failure"

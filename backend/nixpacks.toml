@@ -1,0 +1,20 @@
+[nixpacks]
+# Specify that this is a Node.js project
+provider = "node"
+
+# Set Node.js version
+node_version = "18"
+
+# Install phase - use npm install instead of npm ci
+install_phase = "npm install"
+
+# Build phase
+build_phase = "npm run build"
+
+# Start command
+start_phase = "npm run start"
+
+# Environment variables
+[nixpacks.env]
+NODE_ENV = "production"
+PORT = "3001"
