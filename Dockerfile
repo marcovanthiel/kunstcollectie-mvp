@@ -1,14 +1,11 @@
-FROM node:18
+FROM node:18-alpine
 
 WORKDIR /app
 
-COPY package.json ./
-# Use npm install instead of npm ci to generate a new package-lock.json
-RUN npm install
-
 COPY . .
-RUN NODE_OPTIONS="--max-old-space-size=4096" npx next build
+
+RUN cd frontend && npm install --legacy-peer-deps && npm run build
 
 EXPOSE $PORT
 
-CMD ["sh", "-c", "npx next start -p ${PORT:-3001}"]
+CMD cd frontend && npm run preview -- --host 0.0.0.0 --port $PORT
