@@ -26,10 +26,9 @@ ENV PORT=3001
 ENV NODE_ENV="production"
 ENV FRONTEND_URL="https://kunstcollectie.up.railway.app"
 
-# Generate Prisma client and run migrations
+# Generate Prisma client (without migrations during build)
 RUN cd backend && \
-    npx prisma generate && \
-    npx prisma migrate deploy
+    npx prisma generate
 
 # Build frontend and backend
 RUN cd frontend && npm run build && cd .. && \
