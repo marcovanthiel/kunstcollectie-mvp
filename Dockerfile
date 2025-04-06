@@ -15,18 +15,17 @@ RUN npm install && \
 # Copy the rest of the application
 COPY . .
 
-# Fix vite.config.js if needed
-COPY frontend/vite.config.js ./frontend/vite.config.js
-
 # Set environment variables for backend
 ENV DATABASE_URL="postgresql://postgres:vQWftGjQkBnzpPHUJSbXMkDkkplLvscd@postgres.railway.internal:5432/railway"
 ENV JWT_SECRET="kunstcollectie_app_secret_key_2025"
-ENV PORT=8080
-ENV BACKEND_PORT=3001
+ENV PORT=3001
+ENV NODE_ENV="production"
 ENV FRONTEND_URL="https://kunstcollectie.up.railway.app"
 
-# Generate Prisma client
-RUN cd backend && npx prisma generate
+# Generate Prisma client and run migrations
+RUN cd backend && \
+    npx prisma generate && \
+    npx prisma migrate deploy
 
 # Build frontend and backend
 RUN cd frontend && npm run build && cd .. && \
@@ -34,8 +33,10 @@ RUN cd frontend && npm run build && cd .. && \
 
 # Expose port for the application
 EXPOSE 8080
+EXPOSE 3001
 
-# Make sure start script is executable
+# Create start script
+COPY start.sh /app/start.sh
 RUN chmod +x /app/start.sh
 
 # Start both services
