@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import Layout from './components/Layout';
@@ -73,11 +73,15 @@ function App() {
       <CssBaseline />
       <Router>
         <Routes>
-          {/* Health check route toevoegen */}
+          {/* Health check route */}
           <Route path="/health" element={<div>OK</div>} />
           
+          {/* Login route als hoofdpagina */}
+          <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/" element={<Layout />}>
+          
+          {/* Beveiligde routes binnen Layout */}
+          <Route path="/dashboard" element={<Layout />}>
             <Route index element={<Dashboard />} />
             <Route path="kunstwerken" element={<ArtworkList />} />
             <Route path="kunstwerken/:id" element={<ArtworkDetail />} />
