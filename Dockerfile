@@ -8,8 +8,8 @@ RUN apk update && \
 
 # Copy package files first for better caching
 COPY package.json ./
-COPY frontend/package.json ./frontend/package.json
-COPY backend/package.json ./backend/package.json
+COPY frontend/package.json ./frontend/
+COPY backend/package.json ./backend/
 
 # Install dependencies
 RUN npm install && \
