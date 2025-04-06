@@ -1,5 +1,3 @@
-# Prisma schema voor kunstcollectie applicatie
-
 generator client {
   provider = "prisma-client-js"
 }
