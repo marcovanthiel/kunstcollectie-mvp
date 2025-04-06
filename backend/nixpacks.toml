@@ -5,16 +5,27 @@ provider = "node"
 # Set Node.js version
 node_version = "18"
 
-# Install phase - use npm install instead of npm ci
-install_phase = "npm install"
+# Install phase - install dependencies for both frontend and backend
+install_phase = """
+npm install && \
+cd frontend && npm install --legacy-peer-deps && cd .. && \
+cd backend && npm install && cd ..
+"""
 
-# Build phase
-build_phase = "npm run build"
+# Build phase - build both frontend and backend
+build_phase = """
+cd frontend && npm run build && cd .. && \
+cd backend && npx prisma generate && npm run build
+"""
 
-# Start command
-start_phase = "npm run start"
+# Start command - use a custom start script to run both services
+start_phase = "./start.sh"
 
 # Environment variables
 [nixpacks.env]
 NODE_ENV = "production"
-PORT = "3001"
+PORT = "8080"
+BACKEND_PORT = "3001"
+DATABASE_URL = "postgresql://postgres:vQWftGjQkBnzpPHUJSbXMkDkkplLvscd@postgres.railway.internal:5432/railway"
+JWT_SECRET = "kunstcollectie_app_secret_key_2025"
+FRONTEND_URL = "https://kunstcollectie.up.railway.app"
