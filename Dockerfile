@@ -35,9 +35,8 @@ RUN cd frontend && npm run build && cd .. && \
 # Expose port for the application
 EXPOSE 8080
 
-# Create start script
-RUN echo '#!/bin/sh\n\n# Start the backend server in the background with explicit port 3001\ncd /app/backend && PORT=3001 npm start &\n\n# Wait a moment for backend to initialize\nsleep 5\n\n# Start the frontend server on port 8080 (Railway'\''s default port) \ncd /app/frontend && npm run preview -- --host 0.0.0.0 --port 8080' > /app/start.sh && \
-    chmod +x /app/start.sh
+# Make sure start script is executable
+RUN chmod +x /app/start.sh
 
 # Start both services
 CMD ["/app/start.sh"]
