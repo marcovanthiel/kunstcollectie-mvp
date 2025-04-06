@@ -2,6 +2,10 @@ FROM node:18-alpine
 
 WORKDIR /app
 
+# Install OpenSSL dependencies
+RUN apk update && \
+    apk add --no-cache openssl openssl-dev
+
 # Copy package files first for better caching
 COPY package.json ./
 COPY frontend/package.json ./frontend/package.json
