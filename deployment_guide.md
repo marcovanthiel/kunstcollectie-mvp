@@ -1,72 +1,45 @@
 # Kunstcollectie Deployment Guide
 
-Dit document beschrijft het deployment proces voor de Kunstcollectie applicatie op Railway.com.
-
-## Overzicht
-
-De Kunstcollectie applicatie bestaat uit twee hoofdcomponenten:
-1. Frontend: Een React applicatie gebouwd met Vite
-2. Backend: Een Next.js API server met Prisma ORM
-
-Voor eenvoudige deployment zijn beide componenten geconfigureerd om vanuit één repository te worden gedeployed met een enkele nixpacks configuratie.
+Deze gids bevat instructies voor het deployen van de Kunstcollectie applicatie naar Railway.com.
 
 ## Vereisten
 
+- Een GitHub account
 - Een Railway.com account
-- Een PostgreSQL database op Railway (reeds opgezet)
-- Git repository met de applicatiecode
+- Een PostgreSQL database op Railway
 
-## Deployment Stappen
+## Stappen voor deployment
 
-### 1. Repository Voorbereiden
+1. Download het bijgevoegde zip-bestand (kunstcollectie_monorepo.zip)
+2. Pak het zip-bestand uit
+3. Upload alle bestanden naar een nieuwe GitHub repository:
+   - Zorg ervoor dat alle bestanden in de root van de repository staan
+   - De mapstructuur moet exact overeenkomen met wat in het zip-bestand staat
 
-Zorg ervoor dat de volgende bestanden correct zijn geconfigureerd in de root van uw repository:
+4. Log in op uw Railway.com dashboard
+5. Klik op "New Project" > "Deploy from GitHub repo"
+6. Selecteer uw repository
+7. Laat de Root Directory leeg (om de root van de repository te gebruiken)
+8. Selecteer "dockerfile" als builder (dit is al geconfigureerd in railway.toml)
+9. Klik op "Deploy"
 
-- `nixpacks.toml`: Bevat instructies voor het bouwen van zowel frontend als backend
-- `start.sh`: Script om beide services te starten
-- `railway.toml`: Railway configuratie met omgevingsvariabelen
+## Belangrijke bestanden
 
-### 2. Deployment op Railway
-
-1. Log in op uw Railway.com dashboard
-2. Klik op "New Project" > "Deploy from GitHub repo"
-3. Selecteer uw repository
-4. Zorg ervoor dat de Root Directory leeg is (om de root van de repository te gebruiken)
-5. Selecteer "Nixpacks" als builder
-6. Klik op "Deploy"
-
-### 3. Omgevingsvariabelen
-
-De volgende omgevingsvariabelen worden automatisch geconfigureerd via railway.toml:
-
-- `DATABASE_URL`: Verbindingsstring voor de PostgreSQL database
-- `JWT_SECRET`: Geheime sleutel voor JWT authenticatie
-- `FRONTEND_URL`: URL van de gedeployde applicatie
-- `PORT`: Poort voor de frontend service (standaard 3000)
-- `BACKEND_PORT`: Poort voor de backend service (standaard 3001)
-
-### 4. Database Migratie
-
-De database migratie wordt automatisch uitgevoerd tijdens het buildproces via Prisma.
-
-### 5. Monitoring
-
-Na deployment kunt u de logs bekijken in het Railway dashboard om eventuele problemen op te sporen.
+- `Dockerfile`: Bevat alle instructies voor het bouwen van de applicatie
+- `server.js`: Start zowel de frontend als backend en voert database migraties uit
+- `railway.toml`: Configuratie voor Railway deployment
+- `backend/.env`: Bevat omgevingsvariabelen voor de backend
+- `backend/prisma/schema.prisma`: Database schema definitie
 
 ## Troubleshooting
 
-### Veelvoorkomende Problemen
+Als u problemen ondervindt tijdens de deployment, controleer de volgende punten:
 
-1. **Build Fouten**: Controleer de build logs in Railway voor specifieke foutmeldingen.
-2. **Database Connectie Problemen**: Verifieer dat de DATABASE_URL correct is en dat de database toegankelijk is.
-3. **Frontend/Backend Communicatie**: Controleer of FRONTEND_URL correct is ingesteld.
+1. **Mapstructuur**: Zorg ervoor dat alle bestanden in de juiste mappen staan
+2. **Database connectie**: Controleer of de DATABASE_URL correct is in railway.toml
+3. **Logs**: Bekijk de logs in het Railway dashboard voor meer informatie over eventuele fouten
+4. **Prisma migraties**: De migraties worden uitgevoerd tijdens runtime, niet tijdens de build fase
 
-## Onderhoud
+## Na deployment
 
-Voor toekomstige updates:
-1. Push wijzigingen naar uw GitHub repository
-2. Railway zal automatisch een nieuwe deployment starten
-
-## Conclusie
-
-Met deze configuratie worden zowel de frontend als backend gedeployed als één service, wat het beheer vereenvoudigt. De applicatie is nu toegankelijk via de door Railway toegewezen URL.
+Na een succesvolle deployment is de applicatie beschikbaar op de URL die Railway genereert (meestal https://kunstcollectie.up.railway.app/).

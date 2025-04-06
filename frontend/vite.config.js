@@ -5,11 +5,11 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 3000
+    host: '0.0.0.0',
+    port: 8080
   },
   preview: {
-    port: 8080,
-    host: true,
-    allowedHosts: ['kunstcollectie.up.railway.app', 'localhost', '.railway.app', 'projectkunst.nl']
+    host: '0.0.0.0',
+    port: 8080
   }
 })
