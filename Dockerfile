@@ -29,8 +29,9 @@ ENV FRONTEND_URL="https://kunstcollectie.up.railway.app"
 # Generate Prisma client (without migrations during build)
 RUN cd backend && npx prisma generate
 
-# Build frontend
+# Build frontend and backend
 RUN cd frontend && npm run build
+RUN cd backend && npm run build
 
 # Expose port for the application
 EXPOSE 8080

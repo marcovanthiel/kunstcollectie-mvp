@@ -11,6 +11,7 @@ const BACKEND_PORT = 3001;
 function startBackend() {
   console.log(`Starting backend server on port ${BACKEND_PORT}...`);
   // Use explicit environment variable setting for the backend port
+  // Skip the build step since it's already done in the Dockerfile
   const backendProcess = exec(`cd backend && export PORT=${BACKEND_PORT} && npm run prisma:migrate && npm start`, (error, stdout, stderr) => {
     if (error) {
       console.error(`Backend error: ${error.message}`);
@@ -35,7 +36,23 @@ function startBackend() {
     // Restart backend if it crashes
     if (code !== 0) {
       console.log('Restarting backend...');
-      setTimeout(startBackend, 5000);
+      // If backend crashes, try rebuilding and restarting
+      const rebuildProcess = exec(`cd backend && export PORT=${BACKEND_PORT} && npm run build && npm run prisma:migrate && npm start`, (error, stdout, stderr) => {
+        if (error) {
+          console.error(`Backend rebuild error: ${error.message}`);
+          // If rebuild fails, try regular restart after delay
+          setTimeout(startBackend, 5000);
+          return;
+        }
+      });
+      
+      rebuildProcess.stdout.on('data', (data) => {
+        console.log(`Backend rebuild: ${data}`);
+      });
+      
+      rebuildProcess.stderr.on('data', (data) => {
+        console.error(`Backend rebuild error: ${data}`);
+      });
     }
   });
 }
