@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const { exec } = require('child_process');
 const { createProxyMiddleware } = require('http-proxy-middleware');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -59,6 +60,15 @@ function startBackend() {
 
 // Start the main server first
 console.log(`Starting main server on port ${PORT}...`);
+
+// Log the current directory and check if frontend/dist exists
+console.log(`Current directory: ${__dirname}`);
+const distPath = path.join(__dirname, 'frontend/dist');
+console.log(`Checking if frontend/dist exists: ${fs.existsSync(distPath)}`);
+if (fs.existsSync(distPath)) {
+  console.log(`Contents of frontend/dist: ${fs.readdirSync(distPath).join(', ')}`);
+}
+
 // Setup API proxy to backend
 app.use('/api', createProxyMiddleware({
   target: `http://localhost:${BACKEND_PORT}`,
@@ -78,8 +88,15 @@ app.use('/api', createProxyMiddleware({
 // Serve static files from the frontend build directory
 app.use(express.static(path.join(__dirname, 'frontend/dist')));
 
+// Redirect to login page for root path
+app.get('/', (req, res) => {
+  console.log('Root path requested, redirecting to /login');
+  res.redirect('/login');
+});
+
 // All other GET requests not handled before will return the React app
 app.get('*', (req, res) => {
+  console.log(`Serving index.html for path: ${req.path}`);
   res.sendFile(path.join(__dirname, 'frontend/dist', 'index.html'));
 });
 
