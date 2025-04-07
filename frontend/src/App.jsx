@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, createContext } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import './App.css'
 import Login from './components/Login'
@@ -8,6 +8,9 @@ import ArtworkList from './components/ArtworkList'
 import ArtworkDetail from './components/ArtworkDetail'
 import ArtworkForm from './components/ArtworkForm'
 
+// Create auth context to share authentication state across components
+export const AuthContext = createContext();
+
 function App() {
   console.log('App component initializing...');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -15,21 +18,22 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Function to handle logout that can be passed to child components
+  const handleLogout = () => {
+    console.log('Logging out user...');
+    localStorage.removeItem('token');
+    setIsLoggedIn(false);
+    setUser(null);
+    // No need to navigate here as the Routes will handle redirection
+  };
+
   // Check if user is already logged in on component mount
   useEffect(() => {
     try {
       console.log('Checking authentication status...');
-      const token = localStorage.getItem('token');
-      
-      if (token) {
-        console.log('Token found in localStorage, attempting to validate...');
-        // For now, just consider having a token as being logged in
-        // In a real app, you would validate the token with the server
-        setIsLoggedIn(true);
-        setUser({ role: 'user' }); // Default user info
-      } else {
-        console.log('No token found, user is not logged in');
-      }
+      // Clear any existing token to force login screen
+      localStorage.removeItem('token');
+      setIsLoggedIn(false);
       
       // Remove loading indicator from index.html
       const loadingIndicator = document.getElementById('loading-indicator');
@@ -70,48 +74,50 @@ function App() {
   console.log('App rendering with isLoggedIn:', isLoggedIn);
   
   return (
-    <Router>
-      <div className="app">
-        <Routes>
-          <Route path="/login" element={
-            isLoggedIn ? 
-              <Navigate to="/" replace /> : 
-              <Login setIsLoggedIn={setIsLoggedIn} setUser={setUser} />
-          } />
-          <Route path="/register" element={
-            isLoggedIn ? 
-              <Navigate to="/" replace /> : 
-              <Register />
-          } />
-          <Route path="/" element={
-            isLoggedIn ? 
-              <Dashboard user={user} /> : 
-              <Navigate to="/login" replace />
-          } />
-          <Route path="/artworks" element={
-            isLoggedIn ? 
-              <ArtworkList /> : 
-              <Navigate to="/login" replace />
-          } />
-          <Route path="/artworks/:id" element={
-            isLoggedIn ? 
-              <ArtworkDetail /> : 
-              <Navigate to="/login" replace />
-          } />
-          <Route path="/artworks/new" element={
-            isLoggedIn ? 
-              <ArtworkForm /> : 
-              <Navigate to="/login" replace />
-          } />
-          <Route path="/artworks/edit/:id" element={
-            isLoggedIn ? 
-              <ArtworkForm /> : 
-              <Navigate to="/login" replace />
-          } />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </div>
-    </Router>
+    <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn, user, setUser, handleLogout }}>
+      <Router>
+        <div className="app">
+          <Routes>
+            <Route path="/login" element={
+              isLoggedIn ? 
+                <Navigate to="/" replace /> : 
+                <Login />
+            } />
+            <Route path="/register" element={
+              isLoggedIn ? 
+                <Navigate to="/" replace /> : 
+                <Register />
+            } />
+            <Route path="/" element={
+              isLoggedIn ? 
+                <Dashboard /> : 
+                <Navigate to="/login" replace />
+            } />
+            <Route path="/artworks" element={
+              isLoggedIn ? 
+                <ArtworkList /> : 
+                <Navigate to="/login" replace />
+            } />
+            <Route path="/artworks/:id" element={
+              isLoggedIn ? 
+                <ArtworkDetail /> : 
+                <Navigate to="/login" replace />
+            } />
+            <Route path="/artworks/new" element={
+              isLoggedIn ? 
+                <ArtworkForm /> : 
+                <Navigate to="/login" replace />
+            } />
+            <Route path="/artworks/edit/:id" element={
+              isLoggedIn ? 
+                <ArtworkForm /> : 
+                <Navigate to="/login" replace />
+            } />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </div>
+      </Router>
+    </AuthContext.Provider>
   )
 }
 

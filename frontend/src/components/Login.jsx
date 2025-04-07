@@ -1,8 +1,9 @@
 import { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ApiContext } from '../api';
+import { AuthContext } from '../App';
 
-function Login({ setIsLoggedIn, setUser }) {
+function Login() {
   console.log('Login component initializing...');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -13,6 +14,23 @@ function Login({ setIsLoggedIn, setUser }) {
   // Get API context with error handling
   const apiContext = useContext(ApiContext);
   console.log('ApiContext in Login:', apiContext ? 'Available' : 'Not available');
+  
+  // Get Auth context for authentication state
+  const authContext = useContext(AuthContext);
+  console.log('AuthContext in Login:', authContext ? 'Available' : 'Not available');
+  
+  if (!authContext) {
+    console.error('Auth context not available in Login component');
+    return (
+      <div className="login-container error">
+        <h2>Error</h2>
+        <p>Er is een probleem met de authenticatie context. Probeer de pagina te vernieuwen.</p>
+        <button onClick={() => window.location.reload()}>Vernieuwen</button>
+      </div>
+    );
+  }
+  
+  const { setIsLoggedIn, setUser } = authContext;
   
   // Handle case where API context is not available
   if (!apiContext || !apiContext.api) {
