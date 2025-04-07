@@ -14,9 +14,9 @@ COPY package.json ./
 COPY frontend/package.json ./frontend/
 COPY backend/package.json ./backend/
 
-# Install dependencies
+# Install dependencies with legacy peer deps to avoid conflicts
 RUN npm install
-RUN cd frontend && npm install
+RUN cd frontend && npm install --legacy-peer-deps
 RUN cd backend && npm install
 
 # Copy the rest of the application
