@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect } from 'react';
+import { createContext, useState } from 'react';
 
 export const ApiContext = createContext();
 
@@ -130,9 +130,7 @@ export const ApiProvider = ({ children }) => {
     }
   };
   
-  return (
-    <ApiContext.Provider value={{ api }}>
-      {children}
-    </ApiContext.Provider>
-  );
-};
+  return {
+    api
+  };
+}

@@ -17,5 +17,11 @@ export default defineConfig({
   preview: {
     host: '0.0.0.0',
     port: 8080
+  },
+  // Ensure all .js files are processed by the JSX transformer
+  esbuild: {
+    loader: 'jsx',
+    include: /src\/.*\.jsx?$/,
+    exclude: []
   }
 })
