@@ -1,12 +1,11 @@
 const express = require('express');
 const path = require('path');
 const { exec } = require('child_process');
+const { createProxyMiddleware } = require('http-proxy-middleware');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
-
-// Serve static files from the frontend build directory
-app.use(express.static(path.join(__dirname, 'frontend/dist')));
+const BACKEND_PORT = 3001;
 
 // Start the backend server
 function startBackend() {
@@ -43,11 +42,34 @@ function startBackend() {
 // Start the backend server
 startBackend();
 
-// All other GET requests not handled before will return the React app
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'frontend/dist', 'index.html'));
-});
+// Wait for backend to initialize
+setTimeout(() => {
+  // Setup API proxy to backend
+  app.use('/api', createProxyMiddleware({
+    target: `http://localhost:${BACKEND_PORT}`,
+    changeOrigin: true,
+    pathRewrite: {
+      '^/api': '/api'
+    },
+    onProxyReq: (proxyReq, req, res) => {
+      console.log(`Proxying request to: ${req.method} ${req.path}`);
+    },
+    onError: (err, req, res) => {
+      console.error('Proxy error:', err);
+      res.status(500).json({ error: 'Proxy error', message: err.message });
+    }
+  }));
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on port ${PORT}`);
-});
+  // Serve static files from the frontend build directory
+  app.use(express.static(path.join(__dirname, 'frontend/dist')));
+
+  // All other GET requests not handled before will return the React app
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'frontend/dist', 'index.html'));
+  });
+
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on port ${PORT}`);
+    console.log(`API requests will be proxied to backend on port ${BACKEND_PORT}`);
+  });
+}, 5000); // Wait 5 seconds for backend to start

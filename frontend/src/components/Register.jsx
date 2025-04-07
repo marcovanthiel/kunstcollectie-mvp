@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ApiContext } from '../api';
 
 function Register() {
   const [name, setName] = useState('');
@@ -8,6 +9,7 @@ function Register() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { api } = useContext(ApiContext);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,20 +21,8 @@ function Register() {
     }
     
     try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name, email, password }),
-      });
-      
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || 'Registration failed');
-      }
-      
+      // Use the API context instead of direct fetch
+      await api.register(name, email, password);
       navigate('/login');
     } catch (err) {
       setError(err.message);
