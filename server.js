@@ -67,6 +67,12 @@ const distPath = path.join(__dirname, 'frontend/dist');
 console.log(`Checking if frontend/dist exists: ${fs.existsSync(distPath)}`);
 if (fs.existsSync(distPath)) {
   console.log(`Contents of frontend/dist: ${fs.readdirSync(distPath).join(', ')}`);
+  
+  // Check if assets directory exists and log its contents
+  const assetsPath = path.join(distPath, 'assets');
+  if (fs.existsSync(assetsPath)) {
+    console.log(`Contents of frontend/dist/assets: ${fs.readdirSync(assetsPath).join(', ')}`);
+  }
 }
 
 // Setup API proxy to backend
@@ -85,13 +91,50 @@ app.use('/api', createProxyMiddleware({
   }
 }));
 
-// Serve static files from the frontend build directory
-app.use(express.static(path.join(__dirname, 'frontend/dist')));
+// Serve static files from the frontend build directory with proper caching
+app.use(express.static(path.join(__dirname, 'frontend/dist'), {
+  etag: true, // Enable ETag for caching
+  lastModified: true, // Enable Last-Modified for caching
+  setHeaders: (res, filePath) => {
+    // Set cache control headers for assets
+    if (filePath.includes('/assets/')) {
+      // Cache assets for 1 week
+      res.setHeader('Cache-Control', 'public, max-age=604800');
+    } else {
+      // Don't cache HTML files
+      res.setHeader('Cache-Control', 'no-cache');
+    }
+  }
+}));
 
-// Redirect to login page for root path
+// Redirect root to login
 app.get('/', (req, res) => {
   console.log('Root path requested, redirecting to /login');
   res.redirect('/login');
+});
+
+// Special handling for vite.svg to ensure it's properly served
+app.get('/vite.svg', (req, res) => {
+  const svgPath = path.join(__dirname, 'frontend/dist/vite.svg');
+  if (fs.existsSync(svgPath)) {
+    console.log('Serving vite.svg from specific handler');
+    res.sendFile(svgPath);
+  } else {
+    console.log('vite.svg not found, checking in assets directory');
+    // Try to find it in the assets directory
+    const assetsDir = path.join(__dirname, 'frontend/dist/assets');
+    if (fs.existsSync(assetsDir)) {
+      const files = fs.readdirSync(assetsDir);
+      const svgFile = files.find(file => file.includes('vite') && file.endsWith('.svg'));
+      if (svgFile) {
+        console.log(`Found vite svg in assets: ${svgFile}`);
+        res.sendFile(path.join(assetsDir, svgFile));
+        return;
+      }
+    }
+    // If not found, fall back to index.html
+    res.sendFile(path.join(__dirname, 'frontend/dist', 'index.html'));
+  }
 });
 
 // All other GET requests not handled before will return the React app
