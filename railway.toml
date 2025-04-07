@@ -10,7 +10,6 @@ restartPolicyMaxRetries = 5
 [env]
 NODE_ENV = "production"
 PORT = "8080"
-BACKEND_PORT = "3001"
 DATABASE_URL = "postgresql://postgres:vQWftGjQkBnzpPHUJSbXMkDkkplLvscd@postgres.railway.internal:5432/railway"
 JWT_SECRET = "kunstcollectie_app_secret_key_2025"
 FRONTEND_URL = "${{RAILWAY_PUBLIC_DOMAIN}}"

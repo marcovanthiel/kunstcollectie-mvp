@@ -1,34 +1,54 @@
-// pages/api/auth/register.js - Registratie API endpoint
-import { createUser } from '../../../lib/auth';
+import bcrypt from 'bcrypt'
+import { PrismaClient } from '@prisma/client'
 
 export default async function handler(req, res) {
-  // Alleen POST requests toestaan
   if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Methode niet toegestaan' });
+    return res.status(405).json({ message: 'Method not allowed' })
   }
 
   try {
-    const { email, name, password, role } = req.body;
+    const { name, email, password } = req.body
 
-    // Valideer input
-    if (!email || !name || !password) {
-      return res.status(400).json({ 
-        message: 'E-mail, naam en wachtwoord zijn verplicht' 
-      });
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: 'Name, email and password are required' })
     }
 
-    // Maak gebruiker aan
-    const user = await createUser({ email, name, password, role });
+    // Connect to database
+    const prisma = new PrismaClient()
     
-    // Stuur response
-    return res.status(201).json({ 
-      message: 'Gebruiker succesvol aangemaakt', 
-      user 
-    });
+    // Check if user already exists
+    const existingUser = await prisma.user.findUnique({
+      where: {
+        email
+      }
+    })
+
+    if (existingUser) {
+      return res.status(400).json({ message: 'User with this email already exists' })
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10)
+
+    // Create new user
+    const user = await prisma.user.create({
+      data: {
+        name,
+        email,
+        password: hashedPassword
+      }
+    })
+
+    // Return user (without password)
+    return res.status(201).json({
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email
+      }
+    })
   } catch (error) {
-    console.error('Registratie error:', error);
-    return res.status(400).json({ 
-      message: error.message || 'Registratie mislukt' 
-    });
+    console.error('Registration error:', error)
+    return res.status(500).json({ message: 'Internal server error' })
   }
 }
