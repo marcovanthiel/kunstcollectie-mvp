@@ -5,9 +5,71 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Kunstcollectie</title>
+    <script>
+      // Add global error handler to catch any JavaScript errors
+      window.onerror = function(message, source, lineno, colno, error) {
+        console.error('Global error caught:', message, 'at', source, lineno, colno);
+        console.error('Error stack:', error && error.stack);
+        
+        // Display error on page for debugging
+        document.addEventListener('DOMContentLoaded', function() {
+          const errorDiv = document.createElement('div');
+          errorDiv.style.padding = '20px';
+          errorDiv.style.fontFamily = 'sans-serif';
+          errorDiv.style.backgroundColor = '#ffeeee';
+          errorDiv.style.border = '1px solid #ff0000';
+          errorDiv.style.borderRadius = '5px';
+          errorDiv.style.margin = '20px';
+          
+          errorDiv.innerHTML = `
+            <h2>JavaScript Error Detected</h2>
+            <p><strong>Message:</strong> ${message}</p>
+            <p><strong>Source:</strong> ${source}</p>
+            <p><strong>Line:</strong> ${lineno}, <strong>Column:</strong> ${colno}</p>
+            <pre style="background: #f5f5f5; padding: 10px; border-radius: 5px; overflow: auto;">${error && error.stack || 'No stack trace available'}</pre>
+          `;
+          
+          document.body.prepend(errorDiv);
+        });
+        
+        return true; // Prevents the default error handling
+      };
+    </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Fallback content in case React doesn't render -->
+      <noscript>
+        <div style="padding: 20px; font-family: sans-serif;">
+          <h1>JavaScript is required</h1>
+          <p>Please enable JavaScript to use this application.</p>
+        </div>
+      </noscript>
+      <div id="loading-indicator" style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif;">
+        <div style="text-align: center;">
+          <h2>Kunstcollectie wordt geladen...</h2>
+          <p>Even geduld a.u.b.</p>
+        </div>
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
+    <script>
+      // Add timeout to detect if React doesn't render within a reasonable time
+      setTimeout(function() {
+        const loadingIndicator = document.getElementById('loading-indicator');
+        if (loadingIndicator && loadingIndicator.parentNode) {
+          loadingIndicator.innerHTML = `
+            <div style="text-align: center; padding: 20px; max-width: 600px;">
+              <h2>Laden duurt langer dan verwacht</h2>
+              <p>Er lijkt een probleem te zijn met het laden van de applicatie. Probeer de pagina te vernieuwen.</p>
+              <p>Als het probleem aanhoudt, controleer de browser console voor eventuele foutmeldingen.</p>
+              <button onclick="location.reload()" style="padding: 10px 20px; background: #4F46E5; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 20px;">
+                Pagina vernieuwen
+              </button>
+            </div>
+          `;
+        }
+      }, 10000); // 10 seconds timeout
+    </script>
   </body>
 </html>
