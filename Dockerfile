@@ -3,8 +3,8 @@ FROM node:20-alpine
 # Install dependencies
 RUN apk add --no-cache bash postgresql-client
 
-# Install OpenSSL 3 for Prisma
-RUN apk add --no-cache openssl1.1-compat
+# Install OpenSSL for Prisma - using the correct package for Alpine
+RUN apk add --no-cache openssl
 
 # Set working directory
 WORKDIR /app
