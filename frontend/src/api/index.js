@@ -1,136 +1,100 @@
-import { createContext, useState } from 'react';
+// frontend/src/api/index.js - API integratie voor frontend
+import axios from 'axios';
 
-export const ApiContext = createContext();
+// Basis URL voor API requests
+const API_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://kunstcollectie.up.railway.app/api'
+  : 'http://localhost:3001/api';
 
-export const ApiProvider = ({ children }) => {
-  const [baseUrl, setBaseUrl] = useState('/api');
-  
-  const api = {
-    // Authentication
-    login: async (email, password) => {
-      const response = await fetch(`${baseUrl}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Login failed');
-      }
-      
-      return response.json();
-    },
-    
-    register: async (name, email, password) => {
-      const response = await fetch(`${baseUrl}/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name, email, password }),
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Registration failed');
-      }
-      
-      return response.json();
-    },
-    
-    // Artworks
-    getArtworks: async () => {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${baseUrl}/artworks`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to fetch artworks');
-      }
-      
-      return response.json();
-    },
-    
-    getArtwork: async (id) => {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${baseUrl}/artworks/${id}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to fetch artwork');
-      }
-      
-      return response.json();
-    },
-    
-    createArtwork: async (artworkData) => {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${baseUrl}/artworks`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(artworkData),
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to create artwork');
-      }
-      
-      return response.json();
-    },
-    
-    updateArtwork: async (id, artworkData) => {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${baseUrl}/artworks/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(artworkData),
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to update artwork');
-      }
-      
-      return response.json();
-    },
-    
-    deleteArtwork: async (id) => {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${baseUrl}/artworks/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to delete artwork');
-      }
-      
-      return response.json();
+// Axios instance met standaard configuratie
+const api = axios.create({
+  baseURL: API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Request interceptor voor het toevoegen van de auth token
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
     }
-  };
-  
-  return {
-    api
-  };
-}
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor voor error handling
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Redirect naar login pagina bij 401 Unauthorized
+    if (error.response && error.response.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
+// Auth API calls
+export const authAPI = {
+  login: (email, password) => api.post('/auth/login', { email, password }),
+  register: (userData) => api.post('/auth/register', userData),
+  getCurrentUser: () => {
+    const user = localStorage.getItem('user');
+    return user ? JSON.parse(user) : null;
+  },
+  logout: () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+  }
+};
+
+// Kunstwerken API calls
+export const artworksAPI = {
+  getAll: () => api.get('/artworks'),
+  getById: (id) => api.get(`/artworks/${id}`),
+  create: (artworkData) => api.post('/artworks', artworkData),
+  update: (id, artworkData) => api.put(`/artworks/${id}`, artworkData),
+  delete: (id) => api.delete(`/artworks/${id}`),
+  uploadImage: (formData) => api.post('/artworks/upload', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  }),
+};
+
+// Kunstenaars API calls
+export const artistsAPI = {
+  getAll: () => api.get('/artists'),
+  getById: (id) => api.get(`/artists/${id}`),
+  create: (artistData) => api.post('/artists', artistData),
+  update: (id, artistData) => api.put(`/artists/${id}`, artistData),
+  delete: (id) => api.delete(`/artists/${id}`),
+};
+
+// Locaties API calls
+export const locationsAPI = {
+  getAll: () => api.get('/locations'),
+  getById: (id) => api.get(`/locations/${id}`),
+  create: (locationData) => api.post('/locations', locationData),
+  update: (id, locationData) => api.put(`/locations/${id}`, locationData),
+  delete: (id) => api.delete(`/locations/${id}`),
+};
+
+// Kunstwerk types API calls
+export const artworkTypesAPI = {
+  getAll: () => api.get('/artwork-types'),
+  getById: (id) => api.get(`/artwork-types/${id}`),
+  create: (typeData) => api.post('/artwork-types', typeData),
+  update: (id, typeData) => api.put(`/artwork-types/${id}`, typeData),
+  delete: (id) => api.delete(`/artwork-types/${id}`),
+};
+
+export default api;
