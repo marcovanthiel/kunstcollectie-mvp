@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import authenticate from '../../middleware/authenticate'
+import authenticate from '../../../middleware/authenticate'
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
