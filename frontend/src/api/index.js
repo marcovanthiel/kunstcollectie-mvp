@@ -4,7 +4,7 @@ export const ApiContext = createContext();
 
 export const ApiProvider = ({ children }) => {
   // Add debugging for API context initialization
-  console.log('Initializing ApiProvider...');
+  console.log('Initializing ApiProvider with simplified authentication...');
   
   try {
     const baseUrl = '/api';
@@ -20,6 +20,7 @@ export const ApiProvider = ({ children }) => {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({ email, password }),
+            credentials: 'include', // Important for cookies
           });
           
           if (!response.ok) {
@@ -29,11 +30,38 @@ export const ApiProvider = ({ children }) => {
           }
           
           const data = await response.json();
-          console.log('Login successful, token received:', data.token ? 'Yes (length: ' + data.token.length + ')' : 'No');
+          console.log('Login successful, API key received:', data.apiKey ? 'Yes' : 'No');
+          
+          // Store API key in localStorage for direct API access
+          if (data.apiKey) {
+            localStorage.setItem('apiKey', data.apiKey);
+            console.log('API key stored in localStorage');
+          }
+          
           return data;
         } catch (error) {
           console.error('Login error:', error);
           throw error;
+        }
+      },
+      
+      logout: async () => {
+        console.log('Logging out user...');
+        try {
+          // Clear localStorage
+          localStorage.removeItem('apiKey');
+          
+          // Call logout endpoint to clear cookies
+          const response = await fetch(`${baseUrl}/auth/logout`, {
+            method: 'POST',
+            credentials: 'include', // Important for cookies
+          });
+          
+          return { success: true };
+        } catch (error) {
+          console.error('Logout error:', error);
+          // Even if the server request fails, we still want to clear local storage
+          return { success: true };
         }
       },
       
@@ -65,22 +93,19 @@ export const ApiProvider = ({ children }) => {
       
       // Artworks
       getArtworks: async () => {
-        console.log('Fetching artworks...');
+        console.log('Fetching artworks with simplified auth...');
         try {
-          const token = localStorage.getItem('token');
+          // Get API key from localStorage
+          const apiKey = localStorage.getItem('apiKey');
           
-          // Validate token before using
-          if (!token || typeof token !== 'string' || token.trim() === '') {
-            console.error('Invalid token found in localStorage');
-            throw new Error('Ongeldige authenticatie token. Log opnieuw in.');
+          const headers = {};
+          if (apiKey) {
+            headers['X-API-Key'] = apiKey;
           }
           
-          console.log('Using token for authorization:', token.substring(0, 10) + '...');
-          
           const response = await fetch(`${baseUrl}/artworks`, {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
+            headers,
+            credentials: 'include', // Important for cookies
           });
           
           if (!response.ok) {
@@ -101,18 +126,17 @@ export const ApiProvider = ({ children }) => {
       getArtwork: async (id) => {
         console.log(`Fetching artwork with id: ${id}`);
         try {
-          const token = localStorage.getItem('token');
+          // Get API key from localStorage
+          const apiKey = localStorage.getItem('apiKey');
           
-          // Validate token before using
-          if (!token || typeof token !== 'string' || token.trim() === '') {
-            console.error('Invalid token found in localStorage');
-            throw new Error('Ongeldige authenticatie token. Log opnieuw in.');
+          const headers = {};
+          if (apiKey) {
+            headers['X-API-Key'] = apiKey;
           }
           
           const response = await fetch(`${baseUrl}/artworks/${id}`, {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
+            headers,
+            credentials: 'include', // Important for cookies
           });
           
           if (!response.ok) {
@@ -133,21 +157,22 @@ export const ApiProvider = ({ children }) => {
       createArtwork: async (artworkData) => {
         console.log('Creating new artwork:', artworkData);
         try {
-          const token = localStorage.getItem('token');
+          // Get API key from localStorage
+          const apiKey = localStorage.getItem('apiKey');
           
-          // Validate token before using
-          if (!token || typeof token !== 'string' || token.trim() === '') {
-            console.error('Invalid token found in localStorage');
-            throw new Error('Ongeldige authenticatie token. Log opnieuw in.');
+          const headers = {
+            'Content-Type': 'application/json',
+          };
+          
+          if (apiKey) {
+            headers['X-API-Key'] = apiKey;
           }
           
           const response = await fetch(`${baseUrl}/artworks`, {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
+            headers,
             body: JSON.stringify(artworkData),
+            credentials: 'include', // Important for cookies
           });
           
           if (!response.ok) {
@@ -168,21 +193,22 @@ export const ApiProvider = ({ children }) => {
       updateArtwork: async (id, artworkData) => {
         console.log(`Updating artwork ${id}:`, artworkData);
         try {
-          const token = localStorage.getItem('token');
+          // Get API key from localStorage
+          const apiKey = localStorage.getItem('apiKey');
           
-          // Validate token before using
-          if (!token || typeof token !== 'string' || token.trim() === '') {
-            console.error('Invalid token found in localStorage');
-            throw new Error('Ongeldige authenticatie token. Log opnieuw in.');
+          const headers = {
+            'Content-Type': 'application/json',
+          };
+          
+          if (apiKey) {
+            headers['X-API-Key'] = apiKey;
           }
           
           const response = await fetch(`${baseUrl}/artworks/${id}`, {
             method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
+            headers,
             body: JSON.stringify(artworkData),
+            credentials: 'include', // Important for cookies
           });
           
           if (!response.ok) {
@@ -203,19 +229,18 @@ export const ApiProvider = ({ children }) => {
       deleteArtwork: async (id) => {
         console.log(`Deleting artwork ${id}`);
         try {
-          const token = localStorage.getItem('token');
+          // Get API key from localStorage
+          const apiKey = localStorage.getItem('apiKey');
           
-          // Validate token before using
-          if (!token || typeof token !== 'string' || token.trim() === '') {
-            console.error('Invalid token found in localStorage');
-            throw new Error('Ongeldige authenticatie token. Log opnieuw in.');
+          const headers = {};
+          if (apiKey) {
+            headers['X-API-Key'] = apiKey;
           }
           
           const response = await fetch(`${baseUrl}/artworks/${id}`, {
             method: 'DELETE',
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
+            headers,
+            credentials: 'include', // Important for cookies
           });
           
           if (!response.ok) {
@@ -234,7 +259,7 @@ export const ApiProvider = ({ children }) => {
       }
     };
     
-    console.log('ApiProvider initialized successfully');
+    console.log('ApiProvider initialized successfully with simplified authentication');
     return (
       <ApiContext.Provider value={{ api }}>
         {children}

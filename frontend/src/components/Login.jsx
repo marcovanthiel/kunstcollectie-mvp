@@ -4,7 +4,7 @@ import { ApiContext } from '../api';
 import { AuthContext } from '../App';
 
 function Login() {
-  console.log('Login component initializing...');
+  console.log('Login component initializing with simplified authentication...');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -52,31 +52,17 @@ function Login() {
     setIsLoading(true);
     
     try {
-      console.log(`Attempting login for email: ${email}`);
+      console.log(`Attempting login for email: ${email} with simplified authentication`);
       // Use the API context instead of direct fetch
       const data = await api.login(email, password);
       
-      console.log('Login successful, storing token and user data:', data);
+      console.log('Login successful with simplified authentication');
       
-      // Ensure token is a string before storing
-      if (data && data.token && typeof data.token === 'string') {
-        localStorage.setItem('token', data.token);
-        console.log('Token stored successfully');
-        
-        // Log token format for debugging
-        console.log('Token format check:', {
-          length: data.token.length,
-          containsBearer: data.token.includes('Bearer'),
-          firstChars: data.token.substring(0, 10) + '...'
-        });
-        
-        setIsLoggedIn(true);
-        setUser(data.user);
-        navigate('/');
-      } else {
-        console.error('Invalid token received:', data.token);
-        throw new Error('Ongeldige token ontvangen van de server');
-      }
+      // No need to store token, we're using cookies now
+      // Just update the UI state
+      setIsLoggedIn(true);
+      setUser(data.user);
+      navigate('/');
     } catch (err) {
       console.error('Login error:', err);
       setError(err.message || 'Er is een fout opgetreden bij het inloggen');

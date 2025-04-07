@@ -12,38 +12,81 @@ import ArtworkForm from './components/ArtworkForm'
 export const AuthContext = createContext();
 
 function App() {
-  console.log('App component initializing...');
+  console.log('App component initializing with simplified authentication...');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // Function to handle logout that can be passed to child components
-  const handleLogout = () => {
-    console.log('Logging out user...');
-    localStorage.removeItem('token');
-    setIsLoggedIn(false);
-    setUser(null);
-    // No need to navigate here as the Routes will handle redirection
+  const handleLogout = async () => {
+    console.log('Logging out user with simplified authentication...');
+    try {
+      // Call the logout API endpoint to clear cookies
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include', // Important for cookies
+      });
+      
+      // Clear localStorage
+      localStorage.removeItem('apiKey');
+      
+      // Update state
+      setIsLoggedIn(false);
+      setUser(null);
+      
+      console.log('Logout successful');
+    } catch (err) {
+      console.error('Logout error:', err);
+      // Even if there's an error, we still want to log out the user locally
+      setIsLoggedIn(false);
+      setUser(null);
+    }
   };
 
   // Check if user is already logged in on component mount
   useEffect(() => {
     try {
-      console.log('Checking authentication status...');
-      // Clear any existing token to force login screen
-      localStorage.removeItem('token');
-      setIsLoggedIn(false);
+      console.log('Checking authentication status with simplified authentication...');
       
-      // Remove loading indicator from index.html
-      const loadingIndicator = document.getElementById('loading-indicator');
-      if (loadingIndicator && loadingIndicator.parentNode) {
-        loadingIndicator.style.display = 'none';
-      }
+      // Check for session cookie by making a request to a protected endpoint
+      fetch('/api/auth/check', {
+        credentials: 'include', // Important for cookies
+      })
+        .then(response => {
+          if (response.ok) {
+            return response.json();
+          }
+          // If not authenticated, ensure we're logged out
+          setIsLoggedIn(false);
+          throw new Error('Not authenticated');
+        })
+        .then(data => {
+          if (data && data.authenticated) {
+            console.log('User is authenticated via cookies');
+            setIsLoggedIn(true);
+            setUser(data.user);
+          } else {
+            console.log('User is not authenticated');
+            setIsLoggedIn(false);
+          }
+        })
+        .catch(err => {
+          console.log('Authentication check failed, assuming not logged in:', err.message);
+          setIsLoggedIn(false);
+        })
+        .finally(() => {
+          setIsLoading(false);
+          
+          // Remove loading indicator from index.html
+          const loadingIndicator = document.getElementById('loading-indicator');
+          if (loadingIndicator && loadingIndicator.parentNode) {
+            loadingIndicator.style.display = 'none';
+          }
+        });
     } catch (err) {
       console.error('Error during authentication check:', err);
       setError(err.message);
-    } finally {
       setIsLoading(false);
     }
   }, []);

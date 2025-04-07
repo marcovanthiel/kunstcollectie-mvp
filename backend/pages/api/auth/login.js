@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt'
-import jwt from 'jsonwebtoken'
 import { PrismaClient } from '@prisma/client'
+import { serialize } from 'cookie'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -35,21 +35,42 @@ export default async function handler(req, res) {
       return res.status(401).json({ message: 'Invalid credentials' })
     }
 
-    // Generate JWT token
-    const token = jwt.sign(
-      { id: user.id, email: user.email },
-      process.env.JWT_SECRET,
-      { expiresIn: '7d' }
-    )
+    // Instead of JWT, set a simple session cookie
+    const sessionCookie = serialize('session', 'authenticated', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 60 * 60 * 24 * 7, // 1 week
+      path: '/'
+    })
 
-    // Return user and token
+    const userIdCookie = serialize('userId', user.id, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 60 * 60 * 24 * 7, // 1 week
+      path: '/'
+    })
+
+    const userEmailCookie = serialize('userEmail', user.email, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 60 * 60 * 24 * 7, // 1 week
+      path: '/'
+    })
+
+    // Set cookies in response
+    res.setHeader('Set-Cookie', [sessionCookie, userIdCookie, userEmailCookie])
+
+    // Return user info and API key for direct API access
     return res.status(200).json({
       user: {
         id: user.id,
         name: user.name,
         email: user.email
       },
-      token
+      apiKey: 'kunstcollectie-dev-key-2025' // Simple API key for development
     })
   } catch (error) {
     console.error('Login error:', error)

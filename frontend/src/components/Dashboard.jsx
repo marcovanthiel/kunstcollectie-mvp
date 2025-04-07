@@ -29,30 +29,26 @@ function Dashboard() {
   }
   
   const { user, handleLogout } = authContext;
+  
+  // Handle case where API context is not available
+  if (!apiContext || !apiContext.api) {
+    console.error('API context not available in Dashboard component');
+    return (
+      <div className="error-container">
+        <h2>Error</h2>
+        <p>Er is een probleem met de API verbinding. Probeer de pagina te vernieuwen.</p>
+        <button onClick={() => window.location.reload()}>Vernieuwen</button>
+      </div>
+    );
+  }
+  
+  const { api } = apiContext;
 
   useEffect(() => {
     const fetchArtworks = async () => {
       try {
-        console.log('Fetching artworks...');
-        const token = localStorage.getItem('token');
-        if (!token) {
-          throw new Error('No authentication token found');
-        }
-        
-        console.log('Using token to fetch artworks');
-        const response = await fetch('/api/artworks', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        
-        if (!response.ok) {
-          console.error('Failed to fetch artworks, status:', response.status);
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.message || 'Failed to fetch artworks');
-        }
-        
-        const data = await response.json();
+        console.log('Fetching artworks with simplified authentication...');
+        const data = await api.getArtworks();
         console.log('Artworks fetched successfully:', data);
         setArtworks(data);
       } catch (err) {
@@ -64,7 +60,7 @@ function Dashboard() {
     };
     
     fetchArtworks();
-  }, []);
+  }, [api]);
 
   const handleAddArtwork = () => {
     navigate('/artworks/new');
