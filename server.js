@@ -113,28 +113,49 @@ app.get('/', (req, res) => {
   res.redirect('/login');
 });
 
-// Special handling for vite.svg to ensure it's properly served
-app.get('/vite.svg', (req, res) => {
-  const svgPath = path.join(__dirname, 'frontend/dist/vite.svg');
+// Special handling for favicon.svg to ensure it's properly served
+app.get('/favicon.svg', (req, res) => {
+  console.log('Favicon.svg requested, attempting to serve');
+  const svgPath = path.join(__dirname, 'frontend/dist/favicon.svg');
   if (fs.existsSync(svgPath)) {
-    console.log('Serving vite.svg from specific handler');
+    console.log('Serving favicon.svg from dist directory');
     res.sendFile(svgPath);
   } else {
-    console.log('vite.svg not found, checking in assets directory');
+    console.log('Favicon.svg not found in dist, checking assets directory');
     // Try to find it in the assets directory
     const assetsDir = path.join(__dirname, 'frontend/dist/assets');
     if (fs.existsSync(assetsDir)) {
       const files = fs.readdirSync(assetsDir);
-      const svgFile = files.find(file => file.includes('vite') && file.endsWith('.svg'));
+      const svgFile = files.find(file => file.includes('favicon') && file.endsWith('.svg'));
       if (svgFile) {
-        console.log(`Found vite svg in assets: ${svgFile}`);
+        console.log(`Found favicon in assets: ${svgFile}`);
         res.sendFile(path.join(assetsDir, svgFile));
         return;
       }
     }
-    // If not found, fall back to index.html
-    res.sendFile(path.join(__dirname, 'frontend/dist', 'index.html'));
+    
+    // If still not found, try serving from public directory
+    const publicSvgPath = path.join(__dirname, 'frontend/public/favicon.svg');
+    if (fs.existsSync(publicSvgPath)) {
+      console.log('Serving favicon.svg from public directory');
+      res.sendFile(publicSvgPath);
+      return;
+    }
+    
+    console.log('Favicon.svg not found anywhere, serving fallback');
+    // If not found anywhere, send a simple SVG as fallback
+    res.setHeader('Content-Type', 'image/svg+xml');
+    res.send(`<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+      <rect width="32" height="32" fill="#4F46E5"/>
+      <circle cx="16" cy="16" r="8" fill="white"/>
+    </svg>`);
   }
+});
+
+// Maintain backward compatibility with vite.svg requests
+app.get('/vite.svg', (req, res) => {
+  console.log('Vite.svg requested, redirecting to favicon.svg');
+  res.redirect('/favicon.svg');
 });
 
 // All other GET requests not handled before will return the React app
