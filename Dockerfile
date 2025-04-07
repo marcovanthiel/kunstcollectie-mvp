@@ -25,6 +25,9 @@ COPY . .
 # Build frontend
 RUN cd frontend && npm run build
 
+# Build backend - this is the critical addition
+RUN cd backend && npm run build
+
 # Make start script executable
 RUN chmod +x start.sh
 
