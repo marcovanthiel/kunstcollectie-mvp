@@ -56,11 +56,27 @@ function Login() {
       // Use the API context instead of direct fetch
       const data = await api.login(email, password);
       
-      console.log('Login successful, storing token and user data');
-      localStorage.setItem('token', data.token);
-      setIsLoggedIn(true);
-      setUser(data.user);
-      navigate('/');
+      console.log('Login successful, storing token and user data:', data);
+      
+      // Ensure token is a string before storing
+      if (data && data.token && typeof data.token === 'string') {
+        localStorage.setItem('token', data.token);
+        console.log('Token stored successfully');
+        
+        // Log token format for debugging
+        console.log('Token format check:', {
+          length: data.token.length,
+          containsBearer: data.token.includes('Bearer'),
+          firstChars: data.token.substring(0, 10) + '...'
+        });
+        
+        setIsLoggedIn(true);
+        setUser(data.user);
+        navigate('/');
+      } else {
+        console.error('Invalid token received:', data.token);
+        throw new Error('Ongeldige token ontvangen van de server');
+      }
     } catch (err) {
       console.error('Login error:', err);
       setError(err.message || 'Er is een fout opgetreden bij het inloggen');
@@ -106,9 +122,9 @@ function Login() {
       
       {/* Default login credentials for testing */}
       <div className="default-credentials" style={{marginTop: '20px', padding: '10px', backgroundColor: '#f5f5f5', borderRadius: '5px'}}>
-        <h3>Standaard inloggegevens:</h3>
-        <p><strong>Email:</strong> admin@kunstcollectie.nl</p>
-        <p><strong>Wachtwoord:</strong> admin123</p>
+        <h3>Inloggegevens:</h3>
+        <p><strong>Email:</strong> m@mvt.art</p>
+        <p><strong>Wachtwoord:</strong> Wikkie=555</p>
       </div>
     </div>
   );

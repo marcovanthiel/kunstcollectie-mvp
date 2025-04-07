@@ -29,7 +29,7 @@ export const ApiProvider = ({ children }) => {
           }
           
           const data = await response.json();
-          console.log('Login successful');
+          console.log('Login successful, token received:', data.token ? 'Yes (length: ' + data.token.length + ')' : 'No');
           return data;
         } catch (error) {
           console.error('Login error:', error);
@@ -68,6 +68,15 @@ export const ApiProvider = ({ children }) => {
         console.log('Fetching artworks...');
         try {
           const token = localStorage.getItem('token');
+          
+          // Validate token before using
+          if (!token || typeof token !== 'string' || token.trim() === '') {
+            console.error('Invalid token found in localStorage');
+            throw new Error('Ongeldige authenticatie token. Log opnieuw in.');
+          }
+          
+          console.log('Using token for authorization:', token.substring(0, 10) + '...');
+          
           const response = await fetch(`${baseUrl}/artworks`, {
             headers: {
               'Authorization': `Bearer ${token}`
@@ -93,6 +102,13 @@ export const ApiProvider = ({ children }) => {
         console.log(`Fetching artwork with id: ${id}`);
         try {
           const token = localStorage.getItem('token');
+          
+          // Validate token before using
+          if (!token || typeof token !== 'string' || token.trim() === '') {
+            console.error('Invalid token found in localStorage');
+            throw new Error('Ongeldige authenticatie token. Log opnieuw in.');
+          }
+          
           const response = await fetch(`${baseUrl}/artworks/${id}`, {
             headers: {
               'Authorization': `Bearer ${token}`
@@ -118,6 +134,13 @@ export const ApiProvider = ({ children }) => {
         console.log('Creating new artwork:', artworkData);
         try {
           const token = localStorage.getItem('token');
+          
+          // Validate token before using
+          if (!token || typeof token !== 'string' || token.trim() === '') {
+            console.error('Invalid token found in localStorage');
+            throw new Error('Ongeldige authenticatie token. Log opnieuw in.');
+          }
+          
           const response = await fetch(`${baseUrl}/artworks`, {
             method: 'POST',
             headers: {
@@ -146,6 +169,13 @@ export const ApiProvider = ({ children }) => {
         console.log(`Updating artwork ${id}:`, artworkData);
         try {
           const token = localStorage.getItem('token');
+          
+          // Validate token before using
+          if (!token || typeof token !== 'string' || token.trim() === '') {
+            console.error('Invalid token found in localStorage');
+            throw new Error('Ongeldige authenticatie token. Log opnieuw in.');
+          }
+          
           const response = await fetch(`${baseUrl}/artworks/${id}`, {
             method: 'PUT',
             headers: {
@@ -174,6 +204,13 @@ export const ApiProvider = ({ children }) => {
         console.log(`Deleting artwork ${id}`);
         try {
           const token = localStorage.getItem('token');
+          
+          // Validate token before using
+          if (!token || typeof token !== 'string' || token.trim() === '') {
+            console.error('Invalid token found in localStorage');
+            throw new Error('Ongeldige authenticatie token. Log opnieuw in.');
+          }
+          
           const response = await fetch(`${baseUrl}/artworks/${id}`, {
             method: 'DELETE',
             headers: {
