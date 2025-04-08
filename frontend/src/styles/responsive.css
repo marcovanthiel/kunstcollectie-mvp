@@ -1,0 +1,89 @@
+/* Responsive Design Verification */
+
+/* This file contains additional responsive design rules to ensure the application 
+   looks good on all device sizes from mobile to desktop */
+
+/* Small screens (mobile) */
+@media (max-width: 480px) {
+  .login-container {
+    width: 90%;
+    padding: 1rem;
+    margin: 1rem auto;
+  }
+  
+  .login-logo img {
+    max-width: 150px;
+  }
+  
+  .navbar {
+    padding: 0.75rem;
+    flex-direction: column;
+  }
+  
+  .navbar > div {
+    flex-direction: column;
+  }
+  
+  .navbar button {
+    margin-top: 0.5rem;
+  }
+  
+  .dashboard-header {
+    padding: 1rem;
+  }
+  
+  .dashboard-content {
+    padding: 0 1rem;
+  }
+  
+  .artwork-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Medium screens (tablets) */
+@media (min-width: 481px) and (max-width: 768px) {
+  .login-container {
+    width: 80%;
+  }
+  
+  .artwork-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .dashboard-content {
+    padding: 0 1.5rem;
+  }
+}
+
+/* Large screens (desktops) */
+@media (min-width: 769px) {
+  .login-container {
+    max-width: 400px;
+  }
+  
+  .artwork-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+}
+
+/* Print styles */
+@media print {
+  .navbar, .btn-primary, .btn-secondary {
+    display: none;
+  }
+  
+  body {
+    background-color: white;
+    color: black;
+  }
+  
+  .artwork-grid {
+    display: block;
+  }
+  
+  .artwork-item {
+    page-break-inside: avoid;
+    margin-bottom: 1cm;
+  }
+}
