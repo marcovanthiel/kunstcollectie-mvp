@@ -1,4 +1,4 @@
-// Updated server.js - Main server file for the Kunstcollectie application
+// server.js - Main server file for the Kunstcollectie application
 
 const express = require('express');
 const path = require('path');
@@ -8,7 +8,9 @@ const fs = require('fs');
 
 // Create Express app
 const app = express();
-const PORT = process.env.PORT || 8080;
+// Use only process.env.PORT to let Railway determine the port
+// This fixes the EADDRINUSE error during deployment
+const PORT = process.env.PORT || 3000;
 const BACKEND_PORT = 3001;
 
 // Check if frontend/dist exists
