@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Design Test - Kunstcollectie</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: #333;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .responsive-test {
+            margin: 2rem 0;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .card img {
+            width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .form-group input, 
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+        
+        @media (max-width: 768px) {
+            .test-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .test-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Kunstcollectie Responsive Design Test</h1>
+        <p>Verklein of vergroot uw browser om de responsive functionaliteit te testen</p>
+    </header>
+    
+    <div class="container">
+        <div class="responsive-test">
+            <h2>Kunstwerk Galerij</h2>
+            <p>Deze galerij past zich automatisch aan verschillende schermformaten aan.</p>
+            
+            <div class="test-grid">
+                <div class="card">
+                    <img src="https://via.placeholder.com/300x200" alt="Kunstwerk 1">
+                    <h3>Sunset Landscape</h3>
+                    <p>Artiest: Jane Smith</p>
+                    <p>Prijs: €1200</p>
+                    <button>Details bekijken</button>
+                </div>
+                
+                <div class="card">
+                    <img src="https://via.placeholder.com/300x200" alt="Kunstwerk 2">
+                    <h3>Abstract Composition</h3>
+                    <p>Artiest: John Doe</p>
+                    <p>Prijs: €1800</p>
+                    <button>Details bekijken</button>
+                </div>
+                
+                <div class="card">
+                    <img src="https://via.placeholder.com/300x200" alt="Kunstwerk 3">
+                    <h3>Portrait Study</h3>
+                    <p>Artiest: Jane Smith</p>
+                    <p>Prijs: €950</p>
+                    <button>Details bekijken</button>
+                </div>
+                
+                <div class="card">
+                    <img src="https://via.placeholder.com/300x200" alt="Kunstwerk 4">
+                    <h3>Modern Sculpture</h3>
+                    <p>Artiest: Alex Johnson</p>
+                    <p>Prijs: €2500</p>
+                    <button>Details bekijken</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="responsive-test">
+            <h2>Formulier Test</h2>
+            <p>Dit formulier past zich aan verschillende schermformaten aan.</p>
+            
+            <form>
+                <div class="form-group">
+                    <label for="title">Titel</label>
+                    <input type="text" id="title" name="title" placeholder="Voer titel in">
+                </div>
+                
+                <div class="form-group">
+                    <label for="artist">Artiest</label>
+                    <input type="text" id="artist" name="artist" placeholder="Voer artiest naam in">
+                </div>
+                
+                <div class="form-group">
+                    <label for="year">Jaar</label>
+                    <input type="number" id="year" name="year" placeholder="Voer jaar in">
+                </div>
+                
+                <div class="form-group">
+                    <label for="price">Prijs (€)</label>
+                    <input type="number" id="price" name="price" placeholder="Voer prijs in">
+                </div>
+                
+                <div class="form-group">
+                    <label for="description">Beschrijving</label>
+                    <textarea id="description" name="description" rows="4" placeholder="Voer beschrijving in"></textarea>
+                </div>
+                
+                <button type="submit">Opslaan</button>
+            </form>
+        </div>
+        
+        <div class="responsive-test">
+            <h2>Zoek en Filter Test</h2>
+            <p>Deze zoek- en filterfunctionaliteit past zich aan verschillende schermformaten aan.</p>
+            
+            <form>
+                <div class="form-group">
+                    <label for="search">Zoeken</label>
+                    <input type="text" id="search" name="search" placeholder="Zoek op titel of artiest">
+                </div>
+                
+                <div class="form-group">
+                    <label for="filter-price">Filter op prijs</label>
+                    <select id="filter-price" name="filter-price">
+                        <option value="">Alle prijzen</option>
+                        <option value="0-500">€0 - €500</option>
+                        <option value="500-1000">€500 - €1000</option>
+                        <option value="1000-2000">€1000 - €2000</option>
+                        <option value="2000+">€2000+</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="filter-sold">Filter op status</label>
+                    <select id="filter-sold" name="filter-sold">
+                        <option value="">Alle statussen</option>
+                        <option value="available">Beschikbaar</option>
+                        <option value="sold">Verkocht</option>
+                    </select>
+                </div>
+                
+                <button type="submit">Zoeken</button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        // Eenvoudige script om responsive gedrag te testen
+        window.addEventListener('resize', function() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            console.log(`Venster formaat: ${width}px × ${height}px`);
+        });
+    </script>
+</body>
+</html>

@@ -123,10 +123,13 @@ async function main() {
     await client.query(deleteQuery, ['admin@kunstcollectie.nl']);
     console.log('Cleaned up any existing users with the same emails');
     
-    // Now insert the users with simple INSERT statements
+    // Get current timestamp for updatedAt
+    const now = new Date().toISOString();
+    
+    // Now insert the users with simple INSERT statements including updatedAt
     const customAdminQuery = `
-      INSERT INTO "${tableName}" ("${emailCol}", "${nameCol}", "${passwordCol}", "${roleCol}")
-      VALUES ($1, $2, $3, $4)
+      INSERT INTO "${tableName}" ("${emailCol}", "${nameCol}", "${passwordCol}", "${roleCol}", "${updatedAtCol}")
+      VALUES ($1, $2, $3, $4, $5)
       RETURNING "id", "${emailCol}";
     `;
     
@@ -134,15 +137,16 @@ async function main() {
       'm@mvt.art',
       'Custom Admin',
       customAdminPassword,
-      'ADMIN'
+      'ADMIN',
+      now
     ]);
     
     console.log('Custom admin user created:', customAdminResult.rows[0][emailCol.toLowerCase()]);
 
     // Insert default admin user
     const defaultAdminQuery = `
-      INSERT INTO "${tableName}" ("${emailCol}", "${nameCol}", "${passwordCol}", "${roleCol}")
-      VALUES ($1, $2, $3, $4)
+      INSERT INTO "${tableName}" ("${emailCol}", "${nameCol}", "${passwordCol}", "${roleCol}", "${updatedAtCol}")
+      VALUES ($1, $2, $3, $4, $5)
       RETURNING "id", "${emailCol}";
     `;
     
@@ -150,7 +154,8 @@ async function main() {
       'admin@kunstcollectie.nl',
       'Default Admin',
       defaultAdminPassword,
-      'ADMIN'
+      'ADMIN',
+      now
     ]);
     
     console.log('Default admin user created:', defaultAdminResult.rows[0][emailCol.toLowerCase()]);

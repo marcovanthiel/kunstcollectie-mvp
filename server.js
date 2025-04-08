@@ -1,93 +1,160 @@
-// Alternative fix option - Use process.cwd() to ensure correct path resolution
+// Updated server.js - Main server file for the Kunstcollectie application
+
 const express = require('express');
-const { createProxyMiddleware } = require('http-proxy-middleware');
 const path = require('path');
+const { createProxyMiddleware } = require('http-proxy-middleware');
+const { exec } = require('child_process');
 const fs = require('fs');
 
-// Log the current working directory for debugging
-console.log('Current working directory:', process.cwd());
-
+// Create Express app
 const app = express();
 const PORT = process.env.PORT || 8080;
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
+const BACKEND_PORT = 3001;
 
-// Log middleware
-app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
-  next();
-});
+// Check if frontend/dist exists
+const frontendDistPath = path.join(__dirname, 'frontend', 'dist');
+const frontendDistExists = fs.existsSync(frontendDistPath);
+console.log(`Checking if frontend/dist exists: ${frontendDistExists}`);
 
-// Proxy API requests to backend
-app.use('/api', createProxyMiddleware({
-  target: BACKEND_URL,
-  changeOrigin: true,
-  pathRewrite: {
-    '^/api': '/api'
+if (frontendDistExists) {
+  console.log(`Contents of frontend/dist: ${fs.readdirSync(frontendDistPath).join('\n')}`);
+  
+  // Check for assets directory
+  const assetsPath = path.join(frontendDistPath, 'assets');
+  if (fs.existsSync(assetsPath)) {
+    console.log(`Contents of frontend/dist/assets: ${fs.readdirSync(assetsPath).join('\n')}`);
   }
-}));
-
-// Special handling for favicon.svg and vite.svg
-app.get('/favicon.svg', (req, res) => {
-  const faviconPath = path.join(process.cwd(), 'frontend/public/favicon.svg');
-  if (fs.existsSync(faviconPath)) {
-    res.sendFile(faviconPath);
-  } else {
-    // Fallback SVG if file doesn't exist
-    res.set('Content-Type', 'image/svg+xml');
-    res.send('<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#663399" /></svg>');
-  }
-});
-
-app.get('/vite.svg', (req, res) => {
-  // Redirect to favicon.svg
-  res.redirect('/favicon.svg');
-});
+}
 
 // Serve static files from frontend/dist
-// Fix: Use absolute path with __dirname instead of process.cwd()
-app.use(express.static(path.join('/app', 'frontend/dist')));
+app.use(express.static(frontendDistPath));
 
-// Serve index.html for all other routes (SPA support)
-// Fix: Use absolute path with __dirname instead of process.cwd()
-app.get('*', (req, res) => {
-  const indexPath = path.join('/app', 'frontend/dist/index.html');
-  console.log('Attempting to serve index.html from:', indexPath);
-  
-  if (fs.existsSync(indexPath)) {
-    res.sendFile(indexPath);
-  } else {
-    console.error('Error: index.html not found at', indexPath);
-    res.status(404).send('Error: index.html not found. Please check server configuration.');
-  }
-});
+// Start backend server
+console.log(`Starting backend server on port ${BACKEND_PORT}...`);
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Backend URL: ${BACKEND_URL}`);
-  
-  // Log directory contents for debugging
-  console.log('Contents of frontend/dist:');
-  try {
-    // Fix: Use absolute path instead of process.cwd()
-    const distPath = '/app/frontend/dist';
-    if (fs.existsSync(distPath)) {
-      console.log(fs.readdirSync(distPath));
+// Function to run database migration script
+function migrateDatabase() {
+  return new Promise((resolve, reject) => {
+    console.log('Running database migration script...');
+    exec('node backend/migrate-database.js', (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Database migration error: ${error.message}`);
+        console.error(`stderr: ${stderr}`);
+        // Don't reject here, try to continue
+        console.log('Continuing despite migration error...');
+      }
+      console.log(`Database migration output: ${stdout}`);
+      resolve();
+    });
+  });
+}
+
+// Function to run database setup script
+function setupDatabase() {
+  return new Promise((resolve, reject) => {
+    console.log('Running database setup script...');
+    exec('node backend/setup-database.js', (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Database setup error: ${error.message}`);
+        console.error(`stderr: ${stderr}`);
+        // Don't reject here, try to continue
+        console.log('Continuing despite setup error...');
+      }
+      console.log(`Database setup output: ${stdout}`);
+      resolve();
+    });
+  });
+}
+
+// Function to start backend server
+function startBackend() {
+  return new Promise((resolve, reject) => {
+    // First generate Prisma client
+    console.log('Generating Prisma client...');
+    exec('cd backend && npx prisma generate', (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Prisma generate error: ${error.message}`);
+        console.error(`stderr: ${stderr}`);
+        // Don't reject here, try to continue
+        console.log('Continuing despite Prisma generate error...');
+      }
+      console.log(stdout);
       
-      const assetsPath = path.join(distPath, 'assets');
-      if (fs.existsSync(assetsPath)) {
-        console.log('Contents of frontend/dist/assets:');
-        console.log(fs.readdirSync(assetsPath));
-      }
-    } else {
-      console.log('frontend/dist directory not found!');
-      // List all directories in /app for debugging
-      console.log('Contents of /app:', fs.readdirSync('/app'));
-      if (fs.existsSync('/app/frontend')) {
-        console.log('Contents of /app/frontend:', fs.readdirSync('/app/frontend'));
-      }
-    }
-  } catch (error) {
-    console.error('Error checking directories:', error);
-  }
-});
+      // Run database migration script
+      migrateDatabase()
+        .then(() => {
+          // Then run database migrations
+          console.log('Running database migrations...');
+          exec('cd backend && npx prisma migrate deploy', (error, stdout, stderr) => {
+            if (error) {
+              console.error(`Migration error: ${error.message}`);
+              console.error(`stderr: ${stderr}`);
+              // Don't reject here, try to continue
+              console.log('Continuing despite migration error...');
+            }
+            console.log(stdout);
+            
+            // Run database setup script
+            setupDatabase()
+              .then(() => {
+                // Start backend server
+                const backendProcess = exec('cd backend && npm run dev');
+                
+                backendProcess.stdout.on('data', (data) => {
+                  console.log(`Backend: ${data}`);
+                });
+                
+                backendProcess.stderr.on('data', (data) => {
+                  console.error(`Backend error: ${data}`);
+                });
+                
+                // Give the backend some time to start
+                setTimeout(() => {
+                  console.log('Backend URL:', `http://localhost:${BACKEND_PORT}`);
+                  resolve();
+                }, 5000);
+              })
+              .catch(err => {
+                console.error('Setup database error:', err);
+                // Continue anyway
+                resolve();
+              });
+          });
+        })
+        .catch(err => {
+          console.error('Migrate database error:', err);
+          // Continue anyway
+          resolve();
+        });
+    });
+  });
+}
+
+// Wait for backend to start
+console.log('Waiting for backend to start...');
+startBackend()
+  .then(() => {
+    // Set up proxy middleware for API requests
+    app.use('/', createProxyMiddleware({
+      target: `http://localhost:${BACKEND_PORT}`,
+      changeOrigin: true,
+      logLevel: 'debug'
+    }));
+    
+    // For any other routes, serve the frontend
+    app.get('*', (req, res) => {
+      res.sendFile(path.join(frontendDistPath, 'index.html'));
+    });
+    
+    // Start main server
+    app.listen(PORT, () => {
+      console.log(`Starting main server on port ${PORT}...`);
+    });
+  })
+  .catch((error) => {
+    console.error('Failed to start backend:', error);
+    // Try to start the server anyway
+    app.listen(PORT, () => {
+      console.log(`Starting main server on port ${PORT} despite backend errors...`);
+    });
+  });
