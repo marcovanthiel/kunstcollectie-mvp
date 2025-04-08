@@ -1,8 +1,11 @@
-// Simple Express server to proxy requests to backend and serve frontend
+// Alternative fix option - Use process.cwd() to ensure correct path resolution
 const express = require('express');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 const path = require('path');
 const fs = require('fs');
+
+// Log the current working directory for debugging
+console.log('Current working directory:', process.cwd());
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -25,7 +28,7 @@ app.use('/api', createProxyMiddleware({
 
 // Special handling for favicon.svg and vite.svg
 app.get('/favicon.svg', (req, res) => {
-  const faviconPath = path.join(__dirname, 'frontend/public/favicon.svg');
+  const faviconPath = path.join(process.cwd(), 'frontend/public/favicon.svg');
   if (fs.existsSync(faviconPath)) {
     res.sendFile(faviconPath);
   } else {
@@ -41,11 +44,11 @@ app.get('/vite.svg', (req, res) => {
 });
 
 // Serve static files from frontend/dist
-app.use(express.static(path.join(__dirname, 'frontend/dist')));
+app.use(express.static(path.join(process.cwd(), 'frontend/dist')));
 
 // Serve index.html for all other routes (SPA support)
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'frontend/dist/index.html'));
+  res.sendFile(path.join(process.cwd(), 'frontend/dist/index.html'));
 });
 
 // Start server
@@ -56,7 +59,7 @@ app.listen(PORT, () => {
   // Log directory contents for debugging
   console.log('Contents of frontend/dist:');
   try {
-    const distPath = path.join(__dirname, 'frontend/dist');
+    const distPath = path.join(process.cwd(), 'frontend/dist');
     if (fs.existsSync(distPath)) {
       console.log(fs.readdirSync(distPath));
       
