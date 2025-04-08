@@ -27,4 +27,4 @@ sleep 5
 
 # Start proxy server
 cd ..
-node server.js
+node ./server.js
