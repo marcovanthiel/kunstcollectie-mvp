@@ -1,98 +1,98 @@
-import { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ApiContext } from '../api';
 
-function Dashboard({ user }) {
+const Dashboard = () => {
+  const navigate = useNavigate();
+  const { api } = React.useContext(ApiContext);
   const [artworks, setArtworks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchArtworks = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const response = await fetch('/api/artworks', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
+        const response = await api.getArtworks();
         
-        if (!response.ok) {
-          throw new Error('Failed to fetch artworks');
+        if (response.success) {
+          setArtworks(response.artworks || []);
+        } else {
+          setError('Kon kunstwerken niet laden');
         }
-        
-        const data = await response.json();
-        setArtworks(data);
       } catch (err) {
-        setError(err.message);
+        console.error('Error fetching artworks:', err);
+        setError('Er is een fout opgetreden bij het laden van de kunstwerken');
       } finally {
         setLoading(false);
       }
     };
-    
-    fetchArtworks();
-  }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
+    fetchArtworks();
+  }, [api]);
+
+  const handleLogout = async () => {
+    await api.logout();
     navigate('/login');
   };
 
-  const handleAddArtwork = () => {
-    navigate('/artworks/new');
-  };
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
   return (
-    <div className="dashboard">
-      <header>
-        <h1>Kunstcollectie Dashboard</h1>
-        <div className="user-info">
-          <p>Welcome, {user?.name || 'User'}</p>
-          <button onClick={handleLogout}>Logout</button>
-        </div>
-      </header>
-      
-      <main>
-        <section className="dashboard-actions">
-          <button onClick={handleAddArtwork}>Add New Artwork</button>
-        </section>
-        
-        <section className="dashboard-summary">
-          <div className="summary-card">
-            <h3>Total Artworks</h3>
-            <p className="summary-number">{artworks.length}</p>
+    <div>
+      <nav className="navbar">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <img src="/logo.png" alt="Kunstcollectie Logo" style={{ height: '40px', marginRight: '1rem' }} />
+            <h2 style={{ margin: 0, color: 'white' }}>Kunstcollectie</h2>
           </div>
-        </section>
-        
-        <section className="recent-artworks">
-          <h2>Recent Artworks</h2>
-          {error && <div className="error">{error}</div>}
-          
-          {artworks.length === 0 ? (
-            <p>No artworks found. Add your first artwork!</p>
-          ) : (
-            <div className="artwork-grid">
-              {artworks.slice(0, 4).map(artwork => (
-                <div key={artwork.id} className="artwork-card" onClick={() => navigate(`/artworks/${artwork.id}`)}>
-                  {artwork.imageUrl && <img src={artwork.imageUrl} alt={artwork.title} />}
-                  <h3>{artwork.title}</h3>
-                  <p>{artwork.artist?.name || 'Unknown Artist'}</p>
-                </div>
-              ))}
+          <button onClick={handleLogout} className="btn-secondary">Uitloggen</button>
+        </div>
+      </nav>
+
+      <div className="dashboard-header">
+        <h1 className="dashboard-title">Kunstcollectie Dashboard</h1>
+        <p className="dashboard-subtitle">Beheer uw kunstcollectie</p>
+      </div>
+
+      <div className="dashboard-content">
+        {loading ? (
+          <p>Kunstwerken laden...</p>
+        ) : error ? (
+          <div className="card" style={{ backgroundColor: '#ffebee', color: '#d32f2f' }}>
+            <p>{error}</p>
+          </div>
+        ) : (
+          <>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem' }}>
+              <h2>Kunstwerken</h2>
+              <button className="btn-primary">Nieuw kunstwerk toevoegen</button>
             </div>
-          )}
-          
-          {artworks.length > 4 && (
-            <button onClick={() => navigate('/artworks')}>View All Artworks</button>
-          )}
-        </section>
-      </main>
+
+            {artworks.length === 0 ? (
+              <div className="card">
+                <p>Geen kunstwerken gevonden. Voeg uw eerste kunstwerk toe.</p>
+              </div>
+            ) : (
+              <div className="artwork-grid">
+                {artworks.map((artwork) => (
+                  <div key={artwork.id} className="artwork-item">
+                    <img 
+                      src={artwork.imageUrl || 'https://via.placeholder.com/300x200?text=Geen+afbeelding'} 
+                      alt={artwork.title} 
+                      className="artwork-image" 
+                    />
+                    <div className="artwork-info">
+                      <h3 className="artwork-title">{artwork.title}</h3>
+                      <p className="artwork-artist">{artwork.artist}</p>
+                      <p className="artwork-year">{artwork.year}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
-}
+};
 
 export default Dashboard;

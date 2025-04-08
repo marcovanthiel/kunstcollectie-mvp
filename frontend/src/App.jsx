@@ -1,32 +1,49 @@
-import { useState } from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import './App.css'
-import Login from './components/Login'
-import Register from './components/Register'
-import Dashboard from './components/Dashboard'
-import ArtworkList from './components/ArtworkList'
-import ArtworkDetail from './components/ArtworkDetail'
-import ArtworkForm from './components/ArtworkForm'
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Login from './components/Login';
+import Dashboard from './components/Dashboard';
+import { ApiProvider } from './api';
+import './styles/branding.css';
 
-function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [user, setUser] = useState(null)
+const App = () => {
+  const [isAuthenticated, setIsAuthenticated] = React.useState(
+    !!localStorage.getItem('token')
+  );
+
+  const handleLogin = () => {
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setIsAuthenticated(false);
+  };
 
   return (
-    <Router>
-      <div className="app">
+    <ApiProvider>
+      <Router>
         <Routes>
-          <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} setUser={setUser} />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/" element={isLoggedIn ? <Dashboard user={user} /> : <Login setIsLoggedIn={setIsLoggedIn} setUser={setUser} />} />
-          <Route path="/artworks" element={<ArtworkList />} />
-          <Route path="/artworks/:id" element={<ArtworkDetail />} />
-          <Route path="/artworks/new" element={<ArtworkForm />} />
-          <Route path="/artworks/edit/:id" element={<ArtworkForm />} />
+          <Route 
+            path="/login" 
+            element={
+              isAuthenticated ? 
+              <Navigate to="/dashboard" /> : 
+              <Login onLoginSuccess={handleLogin} />
+            } 
+          />
+          <Route 
+            path="/dashboard" 
+            element={
+              isAuthenticated ? 
+              <Dashboard onLogout={handleLogout} /> : 
+              <Navigate to="/login" />
+            } 
+          />
+          <Route path="/" element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} />} />
         </Routes>
-      </div>
-    </Router>
-  )
-}
+      </Router>
+    </ApiProvider>
+  );
+};
 
-export default App
+export default App;

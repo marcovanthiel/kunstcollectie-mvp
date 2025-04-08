@@ -1,0 +1,67 @@
+/* Responsive styles for Kunstcollectie */
+
+/* Mobile styles (up to 576px) */
+@media (max-width: 576px) {
+  .login-container {
+    max-width: 100%;
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+  
+  .navbar {
+    padding: 0.75rem 1rem;
+  }
+  
+  .dashboard-header {
+    padding: 1.5rem 1rem;
+  }
+  
+  .dashboard-content {
+    padding: 0 1rem 1.5rem;
+  }
+  
+  .artwork-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Tablet styles (577px to 992px) */
+@media (min-width: 577px) and (max-width: 992px) {
+  .artwork-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Desktop styles (993px and up) */
+@media (min-width: 993px) {
+  .container {
+    padding: 0 2rem;
+  }
+}
+
+/* Print styles */
+@media print {
+  .navbar, .btn-primary, .btn-secondary {
+    display: none;
+  }
+  
+  body {
+    background-color: white;
+    color: black;
+  }
+  
+  .dashboard-header {
+    background-color: white;
+    color: black;
+    padding: 1rem 0;
+  }
+  
+  .dashboard-title {
+    color: black;
+  }
+  
+  .card {
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+}
