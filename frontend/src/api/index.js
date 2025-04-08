@@ -1,138 +1,113 @@
-import { createContext, useState, useEffect } from 'react';
+// API functions for the Kunstcollectie application
 
-export const ApiContext = createContext();
+/**
+ * Login function to authenticate users
+ * @param {string} email - User email
+ * @param {string} password - User password
+ * @returns {Promise<Object>} - Response with success status and user data or error message
+ */
+export const login = async (email, password) => {
+  try {
+    // In a real implementation, this would make an API call to the backend
+    const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+    });
 
-export const ApiProvider = ({ children }) => {
-  const [baseUrl, setBaseUrl] = useState('/api');
-  
-  const api = {
-    // Authentication
-    login: async (email, password) => {
-      const response = await fetch(`${baseUrl}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Login failed');
-      }
-      
-      return response.json();
-    },
+    const data = await response.json();
     
-    register: async (name, email, password) => {
-      const response = await fetch(`${baseUrl}/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name, email, password }),
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Registration failed');
+    if (data.success) {
+      // Store authentication token if provided
+      if (data.token) {
+        localStorage.setItem('token', data.token);
       }
       
-      return response.json();
-    },
-    
-    // Artworks
-    getArtworks: async () => {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${baseUrl}/artworks`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to fetch artworks');
-      }
-      
-      return response.json();
-    },
-    
-    getArtwork: async (id) => {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${baseUrl}/artworks/${id}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to fetch artwork');
-      }
-      
-      return response.json();
-    },
-    
-    createArtwork: async (artworkData) => {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${baseUrl}/artworks`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(artworkData),
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to create artwork');
-      }
-      
-      return response.json();
-    },
-    
-    updateArtwork: async (id, artworkData) => {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${baseUrl}/artworks/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(artworkData),
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to update artwork');
-      }
-      
-      return response.json();
-    },
-    
-    deleteArtwork: async (id) => {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${baseUrl}/artworks/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to delete artwork');
-      }
-      
-      return response.json();
+      return {
+        success: true,
+        user: data.user,
+      };
+    } else {
+      return {
+        success: false,
+        message: data.message || 'Login mislukt. Controleer uw gegevens.',
+      };
     }
-  };
-  
-  return (
-    <ApiContext.Provider value={{ api }}>
-      {children}
-    </ApiContext.Provider>
-  );
+  } catch (error) {
+    console.error('Login error:', error);
+    return {
+      success: false,
+      message: 'Er is een fout opgetreden bij het inloggen. Probeer het later opnieuw.',
+    };
+  }
+};
+
+/**
+ * Logout function to end user session
+ * @returns {Promise<Object>} - Response with success status
+ */
+export const logout = async () => {
+  try {
+    // In a real implementation, this would make an API call to the backend
+    const response = await fetch('/api/auth/logout', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
+
+    const data = await response.json();
+    
+    // Always remove token from localStorage on logout attempt
+    localStorage.removeItem('token');
+    
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error('Logout error:', error);
+    // Still remove token even if API call fails
+    localStorage.removeItem('token');
+    return {
+      success: false,
+      message: 'Er is een fout opgetreden bij het uitloggen.',
+    };
+  }
+};
+
+/**
+ * Get artworks from the API
+ * @returns {Promise<Object>} - Response with success status and artworks data
+ */
+export const getArtworks = async () => {
+  try {
+    const response = await fetch('/api/artworks', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
+
+    const data = await response.json();
+    
+    if (data.success) {
+      return {
+        success: true,
+        artworks: data.artworks,
+      };
+    } else {
+      return {
+        success: false,
+        message: data.message || 'Kon kunstwerken niet laden.',
+      };
+    }
+  } catch (error) {
+    console.error('Error fetching artworks:', error);
+    return {
+      success: false,
+      message: 'Er is een fout opgetreden bij het ophalen van kunstwerken.',
+    };
+  }
 };
