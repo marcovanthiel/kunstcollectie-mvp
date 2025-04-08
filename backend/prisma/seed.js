@@ -1,6 +1,6 @@
 // Add seed script to package.json
 const { PrismaClient } = require('@prisma/client');
-const bcrypt = require('bcrypt');
+const bcryptjs = require('bcryptjs');
 
 async function main() {
   const prisma = new PrismaClient();
@@ -13,13 +13,13 @@ async function main() {
       where: { email: 'm@mvt.art' },
       update: {
         name: 'Custom Admin',
-        password: await bcrypt.hash('Wikkie=555', 10),
+        password: await bcryptjs.hash('Wikkie=555', 10),
         role: 'ADMIN',
       },
       create: {
         name: 'Custom Admin',
         email: 'm@mvt.art',
-        password: await bcrypt.hash('Wikkie=555', 10),
+        password: await bcryptjs.hash('Wikkie=555', 10),
         role: 'ADMIN',
       },
     });
@@ -31,13 +31,13 @@ async function main() {
       where: { email: 'admin@kunstcollectie.nl' },
       update: {
         name: 'Default Admin',
-        password: await bcrypt.hash('admin123', 10),
+        password: await bcryptjs.hash('admin123', 10),
         role: 'ADMIN',
       },
       create: {
         name: 'Default Admin',
         email: 'admin@kunstcollectie.nl',
-        password: await bcrypt.hash('admin123', 10),
+        password: await bcryptjs.hash('admin123', 10),
         role: 'ADMIN',
       },
     });

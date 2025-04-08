@@ -44,11 +44,21 @@ app.get('/vite.svg', (req, res) => {
 });
 
 // Serve static files from frontend/dist
-app.use(express.static(path.join(process.cwd(), 'frontend/dist')));
+// Fix: Use absolute path with __dirname instead of process.cwd()
+app.use(express.static(path.join('/app', 'frontend/dist')));
 
 // Serve index.html for all other routes (SPA support)
+// Fix: Use absolute path with __dirname instead of process.cwd()
 app.get('*', (req, res) => {
-  res.sendFile(path.join(process.cwd(), 'frontend/dist/index.html'));
+  const indexPath = path.join('/app', 'frontend/dist/index.html');
+  console.log('Attempting to serve index.html from:', indexPath);
+  
+  if (fs.existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    console.error('Error: index.html not found at', indexPath);
+    res.status(404).send('Error: index.html not found. Please check server configuration.');
+  }
 });
 
 // Start server
@@ -59,7 +69,8 @@ app.listen(PORT, () => {
   // Log directory contents for debugging
   console.log('Contents of frontend/dist:');
   try {
-    const distPath = path.join(process.cwd(), 'frontend/dist');
+    // Fix: Use absolute path instead of process.cwd()
+    const distPath = '/app/frontend/dist';
     if (fs.existsSync(distPath)) {
       console.log(fs.readdirSync(distPath));
       
@@ -70,6 +81,11 @@ app.listen(PORT, () => {
       }
     } else {
       console.log('frontend/dist directory not found!');
+      // List all directories in /app for debugging
+      console.log('Contents of /app:', fs.readdirSync('/app'));
+      if (fs.existsSync('/app/frontend')) {
+        console.log('Contents of /app/frontend:', fs.readdirSync('/app/frontend'));
+      }
     }
   } catch (error) {
     console.error('Error checking directories:', error);
