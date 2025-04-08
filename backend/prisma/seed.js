@@ -3,9 +3,10 @@ const { PrismaClient } = require('@prisma/client');
 const bcryptjs = require('bcryptjs');
 
 async function main() {
-  const prisma = new PrismaClient();
-  
+  // Ensure Prisma client is properly initialized
   try {
+    const prisma = new PrismaClient();
+    
     console.log('Seeding database with custom admin user...');
     
     // Create custom admin user
@@ -45,12 +46,18 @@ async function main() {
     console.log('Default admin user created:', defaultAdmin.email);
     
     console.log('Database seeding completed successfully');
+    
+    // Explicitly disconnect from the database
+    await prisma.$disconnect();
   } catch (error) {
     console.error('Error seeding database:', error);
     throw error;
-  } finally {
-    await prisma.$disconnect();
   }
 }
 
-main();
+// Execute main function and handle any errors
+main()
+  .catch(e => {
+    console.error('Error in seed script:', e);
+    process.exit(1);
+  });

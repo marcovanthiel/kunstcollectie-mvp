@@ -1,25 +1,30 @@
 {
   "name": "kunstcollectie-backend",
   "version": "1.0.0",
-  "private": true,
+  "description": "Backend for Kunstcollectie application",
+  "main": "index.js",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "lint": "next lint",
     "prisma:migrate": "prisma migrate deploy",
+    "prisma:generate": "prisma generate",
     "prisma:seed": "prisma db seed"
-  },
-  "dependencies": {
-    "@prisma/client": "^4.13.0",
-    "bcryptjs": "^2.4.3",
-    "cookie": "^0.5.0",
-    "jsonwebtoken": "^9.0.0",
-    "next": "^13.3.1"
-  },
-  "devDependencies": {
-    "prisma": "^4.13.0"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.0.0",
+    "bcryptjs": "^2.4.3",
+    "cookie": "^0.5.0",
+    "jsonwebtoken": "^9.0.0",
+    "next": "^13.4.12",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "prisma": "^5.0.0"
   }
 }

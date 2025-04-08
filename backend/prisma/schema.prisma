@@ -1,3 +1,5 @@
+// This file contains the Prisma schema for the database
+
 generator client {
   provider = "prisma-client-js"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
@@ -8,78 +10,28 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Gebruikersmodel voor authenticatie
 model User {
-  id             Int      @id @default(autoincrement())
-  email          String   @unique
-  name           String
-  password       String
-  role           String   @default("user") // admin, manager, user
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  artworks       Artwork[]
-  artists        Artist[]
-  locations      Location[]
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  password  String
+  role      String   @default("USER")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  artworks  Artwork[]
 }
 
-// Kunstwerk model
 model Artwork {
-  id             Int      @id @default(autoincrement())
-  title          String
-  description    String?
-  creationDate   DateTime?
-  acquisitionDate DateTime?
-  value          Float?
-  imageUrl       String?
-  typeId         Int?
-  artistId       Int?
-  locationId     Int?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  createdBy      Int?
-  type           ArtworkType? @relation(fields: [typeId], references: [id])
-  artist         Artist?     @relation(fields: [artistId], references: [id])
-  location       Location?   @relation(fields: [locationId], references: [id])
-  createdByUser  User?       @relation(fields: [createdBy], references: [id])
-}
-
-// Kunstenaar model
-model Artist {
-  id             Int      @id @default(autoincrement())
-  name           String
-  biography      String?
-  birthDate      DateTime?
-  deathDate      DateTime?
-  nationality    String?
-  imageUrl       String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  createdBy      Int?
-  artworks       Artwork[]
-  createdByUser  User?    @relation(fields: [createdBy], references: [id])
-}
-
-// Locatie model
-model Location {
-  id             Int      @id @default(autoincrement())
-  name           String
-  address        String?
-  city           String?
-  country        String?
-  description    String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  createdBy      Int?
-  artworks       Artwork[]
-  createdByUser  User?    @relation(fields: [createdBy], references: [id])
-}
-
-// Type kunstwerk model
-model ArtworkType {
-  id             Int      @id @default(autoincrement())
-  name           String
-  description    String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  artworks       Artwork[]
+  id          String   @id @default(uuid())
+  title       String
+  artist      String
+  year        Int?
+  description String?
+  imageUrl    String?
+  price       Float?
+  sold        Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
 }
