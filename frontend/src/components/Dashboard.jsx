@@ -1,27 +1,32 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ApiContext } from '../api';
+import { AuthContext } from '../App';
 
-const Dashboard = () => {
+function Dashboard() {
   const navigate = useNavigate();
-  const { api } = React.useContext(ApiContext);
+  const { api } = useContext(ApiContext);
+  const { user, handleLogout } = useContext(AuthContext);
   const [artworks, setArtworks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchArtworks = async () => {
       try {
+        console.log('Fetching artworks from Dashboard component');
         const response = await api.getArtworks();
         
-        if (response.success) {
-          setArtworks(response.artworks || []);
+        if (response && response.artworks) {
+          console.log(`Fetched ${response.artworks.length} artworks`);
+          setArtworks(response.artworks);
         } else {
-          setError('Kon kunstwerken niet laden');
+          console.warn('No artworks returned from API');
+          setArtworks([]);
         }
       } catch (err) {
         console.error('Error fetching artworks:', err);
-        setError('Er is een fout opgetreden bij het laden van de kunstwerken');
+        setError(err.message || 'Er is een fout opgetreden bij het ophalen van kunstwerken');
       } finally {
         setLoading(false);
       }
@@ -30,69 +35,92 @@ const Dashboard = () => {
     fetchArtworks();
   }, [api]);
 
-  const handleLogout = async () => {
-    await api.logout();
-    navigate('/login');
+  const handleAddArtwork = () => {
+    navigate('/artworks/new');
   };
 
-  return (
-    <div>
-      <nav className="navbar">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <img src="/logo.png" alt="Kunstcollectie Logo" style={{ height: '40px', marginRight: '1rem' }} />
-            <h2 style={{ margin: 0, color: 'white' }}>Kunstcollectie</h2>
-          </div>
-          <button onClick={handleLogout} className="btn-secondary">Uitloggen</button>
-        </div>
-      </nav>
+  const handleViewArtwork = (id) => {
+    navigate(`/artworks/${id}`);
+  };
 
-      <div className="dashboard-header">
-        <h1 className="dashboard-title">Kunstcollectie Dashboard</h1>
-        <p className="dashboard-subtitle">Beheer uw kunstcollectie</p>
-      </div>
-
-      <div className="dashboard-content">
-        {loading ? (
+  if (loading) {
+    return (
+      <div className="dashboard-container">
+        <header className="dashboard-header">
+          <h1>Dashboard</h1>
+          <button onClick={handleLogout}>Uitloggen</button>
+        </header>
+        <div className="dashboard-content loading">
           <p>Kunstwerken laden...</p>
-        ) : error ? (
-          <div className="card" style={{ backgroundColor: '#ffebee', color: '#d32f2f' }}>
-            <p>{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="dashboard-container">
+        <header className="dashboard-header">
+          <h1>Dashboard</h1>
+          <button onClick={handleLogout}>Uitloggen</button>
+        </header>
+        <div className="dashboard-content error">
+          <h2>Er is een fout opgetreden</h2>
+          <p>{error}</p>
+          <button onClick={() => window.location.reload()}>Probeer opnieuw</button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="dashboard-container">
+      <header className="dashboard-header">
+        <h1>Dashboard</h1>
+        <div className="user-info">
+          <span>Welkom, {user?.name || 'Gebruiker'}</span>
+          <button onClick={handleLogout}>Uitloggen</button>
+        </div>
+      </header>
+      
+      <div className="dashboard-content">
+        <div className="dashboard-actions">
+          <h2>Mijn Kunstcollectie</h2>
+          <button onClick={handleAddArtwork}>Nieuw kunstwerk toevoegen</button>
+        </div>
+        
+        {artworks.length === 0 ? (
+          <div className="no-artworks">
+            <p>Je hebt nog geen kunstwerken in je collectie.</p>
+            <button onClick={handleAddArtwork}>Voeg je eerste kunstwerk toe</button>
           </div>
         ) : (
-          <>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem' }}>
-              <h2>Kunstwerken</h2>
-              <button className="btn-primary">Nieuw kunstwerk toevoegen</button>
-            </div>
-
-            {artworks.length === 0 ? (
-              <div className="card">
-                <p>Geen kunstwerken gevonden. Voeg uw eerste kunstwerk toe.</p>
+          <div className="artwork-grid">
+            {artworks.map((artwork) => (
+              <div 
+                key={artwork.id} 
+                className="artwork-card"
+                onClick={() => handleViewArtwork(artwork.id)}
+              >
+                <div className="artwork-image">
+                  {artwork.imageUrl ? (
+                    <img src={artwork.imageUrl} alt={artwork.title} />
+                  ) : (
+                    <div className="no-image">Geen afbeelding</div>
+                  )}
+                </div>
+                <div className="artwork-info">
+                  <h3>{artwork.title}</h3>
+                  {artwork.artist && <p className="artist">{artwork.artist.name}</p>}
+                  {artwork.year && <p className="year">{artwork.year}</p>}
+                </div>
               </div>
-            ) : (
-              <div className="artwork-grid">
-                {artworks.map((artwork) => (
-                  <div key={artwork.id} className="artwork-item">
-                    <img 
-                      src={artwork.imageUrl || 'https://via.placeholder.com/300x200?text=Geen+afbeelding'} 
-                      alt={artwork.title} 
-                      className="artwork-image" 
-                    />
-                    <div className="artwork-info">
-                      <h3 className="artwork-title">{artwork.title}</h3>
-                      <p className="artwork-artist">{artwork.artist}</p>
-                      <p className="artwork-year">{artwork.year}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </>
+            ))}
+          </div>
         )}
       </div>
     </div>
   );
-};
+}
 
 export default Dashboard;

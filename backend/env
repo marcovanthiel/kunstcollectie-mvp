@@ -1,0 +1,22 @@
+# Backend Environment Variables
+
+# Database connection
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/kunstcollectie?schema=public"
+
+# Authentication settings
+JWT_SECRET="kunstcollectie-secret-key-2025"
+SESSION_COOKIE_NAME="session"
+SESSION_COOKIE_SECURE=false
+SESSION_COOKIE_SAMESITE="strict"
+SESSION_COOKIE_MAXAGE=604800 # 1 week in seconds
+
+# API settings
+API_KEY="kunstcollectie-dev-key-2025"
+CORS_ORIGIN="http://localhost:5173"
+
+# Server settings
+PORT=3000
+NODE_ENV="development"
+
+# Logging
+LOG_LEVEL="debug"

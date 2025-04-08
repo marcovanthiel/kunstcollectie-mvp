@@ -1,0 +1,17 @@
+# Frontend Environment Variables
+
+# API URL - Points to the backend API
+VITE_API_URL=/api
+
+# Authentication settings
+VITE_AUTH_COOKIE_NAME=session
+VITE_AUTH_COOKIE_SECURE=false
+VITE_AUTH_COOKIE_SAMESITE=strict
+
+# Application settings
+VITE_APP_NAME=Kunstcollectie
+VITE_APP_VERSION=1.0.0
+
+# Development settings
+VITE_DEV_MODE=true
+VITE_ENABLE_LOGGING=true
