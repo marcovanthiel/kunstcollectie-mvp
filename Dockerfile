@@ -2,8 +2,6 @@ FROM node:20-alpine
 
 # Install dependencies
 RUN apk add --no-cache bash postgresql-client
-
-# Install OpenSSL for Prisma - using the correct package for Alpine
 RUN apk add --no-cache openssl
 
 # Set working directory
@@ -14,12 +12,12 @@ COPY package.json ./
 COPY frontend/package.json ./frontend/
 COPY backend/package.json ./backend/
 
-# Install dependencies with legacy peer deps to avoid conflicts
+# Install dependencies
 RUN npm install
-RUN cd frontend && npm install --legacy-peer-deps
+RUN cd frontend && npm install
 RUN cd backend && npm install
 
-# Copy the rest of the application
+# Copy application code
 COPY . .
 
 # Build frontend
@@ -28,11 +26,12 @@ RUN cd frontend && npm run build
 # Build backend - this is the critical addition
 RUN cd backend && npm run build
 
-# Make start script executable
-RUN chmod +x start.sh
-
 # Expose port
 EXPOSE 8080
 
+# Start script
+COPY start.sh /app/start.sh
+RUN chmod +x /app/start.sh
+
 # Start the application
-CMD ["./start.sh"]
+CMD ["/app/start.sh"]
